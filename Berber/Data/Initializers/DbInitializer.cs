@@ -17,7 +17,7 @@ namespace Berber.Data.Initializers // Proje adınız neyse ona göre düzeltin
             {
                 // 1. Veritabanı migrasyonu (Aynı)
                 await context.Database.MigrateAsync();
-                logger.LogInformation("Veritabanı migrasyonu kontrol edildi/uygulandı.");
+                logger.LogInformation("Veritabanı migrasyonu kontrol edildi/uygulandı...");
 
                 // 2. Rolleri Oluştur (Aynı)
                 string[] roleNames = { "Admin", "Calisan", "Musteri" };
