@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Berber.Models.Hizmet>
+
+@{
+    ViewData["Title"] = "Hizmet Listesi";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Yeni Hizmet Ekle</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Hizmet Adı</th>
+            <th>Süre (Dakika)</th>
+            <th>Ücret</th>
+            <th>Ait Olduğu Salon</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Ad)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Sure)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Ucret)
+                </td>
+                <td>
+                    @* Include(h => h.Salon) dediğimiz için burası çalışacak *@
+                    @Html.DisplayFor(modelItem => item.Salon.Ad)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info">Düzenle</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Detay</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Sil</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

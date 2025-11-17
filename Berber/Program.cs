@@ -1,24 +1,31 @@
-﻿// using... satırlarına bunları eklediğinizden emin olun:
-using Berber.Data;
-using Berber.Data.Initializers;
-using Berber.Models; // ApplicationUser için
+// Gerekli kütüphaneleri en üste ekleyin
+using Berber.Data; // Proje adınız neyse ona göre düzeltin
+using Berber.Data.Initializers; // Proje adınız neyse ona göre düzeltin
+using Berber.Models; // Proje adınız neyse ona göre düzeltin
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection; // CreateScope için
+using Microsoft.Extensions.Logging; // ILogger için
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Berber.Services; // Kendi proje adınıza göre düzeltin
+using System; // Exception için
 
+// --- 1. Builder (İnşaatçı) Oluşturuluyor ---
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Connection string'i appsettings.json'dan al
+// --- 2. Servisler Ekleniyor ---
+
+// Connection string'i appsettings.json'dan al
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// 2. DbContext'i servislere ekle
+// BİZİM DOĞRU VERİTABANI SINIFIMIZ: ApplicationDbContext
+// 'BerberContext' için olası bir kaydı SİLİYORUZ. Sadece bu kalmalı.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 3. Identity'yi servislere ekle
-// Projemize ApplicationUser sınıfını ve IdentityRole (Admin, Musteri, Calisan)
-// kullanacağımızı söylüyoruz.
+// Identity'yi servislere ekle (ŞİFRE KURALLARIYLA BİRLİKTE)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
-    // Geliştirme aşamasında şifre kurallarını basit tutabiliriz
+    // Geliştirme aşamasında şifre kurallarını basit tutuyoruz
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
@@ -26,21 +33,29 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
     options.Password.RequireLowercase = false;
     options.Password.RequiredLength = 3;
 })
+    // DOĞRU VERİTABANI SINIFINI BURADA DA KULLAN
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders(); // Şifre sıfırlama vb. için
+    .AddDefaultTokenProviders();
 
-
-// MVC servislerini ekle (bu satır zaten vardır)
+// MVC servislerini ekle
 builder.Services.AddControllersWithViews();
 
+
+// Razor Pages servisini ekle (Login/Register sayfaları için)
 builder.Services.AddRazorPages();
 
+// Sahte e-posta göndericimizi servislere ekliyoruz.
+builder.Services.AddSingleton<IEmailSender, DummyEmailSender>();
+
+
+// --- 3. Uygulama (app) İnşa Ediliyor ---
 var app = builder.Build();
 
+// --- 4. BAŞLANGIÇ VERİSİ (SEED DATA) KODU ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
+    var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>(); // Bu hatayı çözmüştük
     try
     {
         logger.LogInformation("Başlangıç verisi (Seed) servisi çalıştırılıyor...");
@@ -48,21 +63,21 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // DbInitializer sınıfımızdaki güncellenmiş metodu çağırıyoruz
         await DbInitializer.Initialize(context, userManager, roleManager, logger);
     }
     catch (Exception ex)
     {
-        // Hata olursa konsola yazdır
         logger.LogError(ex, "Veritabanına başlangıç verisi eklenirken bir hata oluştu.");
     }
 }
+// --- BAŞLANGIÇ VERİSİ BİTİŞ ---
 
+
+// --- 5. Pipeline (Yönlendirme) Ayarları ---
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-    // ... (diğer app.Use... kodları)
 }
 
 app.UseHttpsRedirection();
@@ -70,13 +85,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Bu satırların sırası önemli
-app.UseAuthorization();  // Authentication'dan sonra gelmeli
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapRazorPages(); // Identity sayfaları için
+app.MapRazorPages();
 
+// --- 6. Uygulama Çalıştırılıyor ---
 app.Run();
