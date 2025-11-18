@@ -1,0 +1,40 @@
+﻿@model Berber.Models.CalisanUygunluk
+
+@{
+    ViewData["Title"] = "Saati Sil";
+}
+
+<h1>Çalışma Saatini Sil</h1>
+<h3 class="text-danger">Bu zaman dilimini silmek istediğinizden emin misiniz?</h3>
+
+<div class="card p-3 mt-3">
+    <h4>@Model.Calisan.AdSoyad</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Gün</dt>
+        <dd class="col-sm-10">
+            @* İngilizce günü Türkçeye çevirerek göster *@
+            @System.Globalization.CultureInfo.GetCultureInfo("tr-TR").DateTimeFormat.DayNames[(int)Model.Gun]
+        </dd>
+
+        <dt class="col-sm-2">Başlangıç</dt>
+        <dd class="col-sm-10">
+            @Model.BaslangicSaati.ToString(@"hh\:mm")
+        </dd>
+
+        <dt class="col-sm-2">Bitiş</dt>
+        <dd class="col-sm-10">
+            @Model.BitisSaati.ToString(@"hh\:mm")
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        @* Silinecek ID *@
+        <input type="hidden" asp-for="Id" />
+
+        <input type="submit" value="Evet, Sil" class="btn btn-danger" />
+
+        @* İptal ederse o çalışanın listesine dönsün *@
+        <a asp-action="Index" asp-route-calisanId="@Model.CalisanId" class="btn btn-outline-secondary">İptal Et</a>
+    </form>
+</div>

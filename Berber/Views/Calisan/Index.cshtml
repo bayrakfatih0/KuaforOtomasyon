@@ -30,6 +30,7 @@
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info">Düzenle</a>
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Detay</a>
                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Sil</a>
+                    <a asp-controller="CalisanUygunluk" asp-action="Index" asp-route-calisanId="@item.Id" class="btn btn-sm btn-warning">Saatler</a>
                 </td>
             </tr>
         }

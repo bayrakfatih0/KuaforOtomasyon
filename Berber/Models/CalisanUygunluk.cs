@@ -1,5 +1,6 @@
-﻿using Berber.Models;
-using System;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Berber.Models
 {
@@ -7,14 +8,24 @@ namespace Berber.Models
     {
         public int Id { get; set; }
 
-        // (Pazartesi=1, Salı=2... Pazar=7 veya DayOfWeek enum'u)
-        public DayOfWeek Gun { get; set; }
-        public TimeSpan BaslangicSaati { get; set; } // Örn: 09:00
-        public TimeSpan BitisSaati { get; set; }   // Örn: 17:00
+        [Required]
+        [Display(Name = "Gün")]
+        public DayOfWeek Gun { get; set; } // Pazartesi, Salı... (0=Pazar, 1=Pazartesi)
 
-        // --- İlişkiler ---
-        // Bu uygunluğun hangi çalışana ait olduğu
+        [Required]
+        [DataType(DataType.Time)] // HTML'de saat seçici çıkmasını sağlar
+        [Display(Name = "Başlangıç Saati")]
+        public TimeSpan BaslangicSaati { get; set; }
+
+        [Required]
+        [DataType(DataType.Time)]
+        [Display(Name = "Bitiş Saati")]
+        public TimeSpan BitisSaati { get; set; }
+
+        // --- İLİŞKİ ---
         public int CalisanId { get; set; }
-        public virtual Calisan Calisan { get; set; }
+
+        [ForeignKey("CalisanId")]
+        public virtual Calisan? Calisan { get; set; }
     }
 }
