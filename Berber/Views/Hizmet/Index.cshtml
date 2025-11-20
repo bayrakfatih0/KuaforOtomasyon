@@ -1,46 +1,50 @@
 ﻿@model IEnumerable<Berber.Models.Hizmet>
 
 @{
-    ViewData["Title"] = "Hizmet Listesi";
+    ViewData["Title"] = "Hizmet Yönetimi";
 }
 
 <h1>@ViewData["Title"]</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Yeni Hizmet Ekle</a>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Hizmet Ekle
+    </a>
 </p>
 
-<table class="table table-striped">
-    <thead>
+@* Zephyr Temasına Uygun Tablo Şablonu *@
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
         <tr>
             <th>Hizmet Adı</th>
             <th>Süre (Dakika)</th>
             <th>Ücret</th>
             <th>Ait Olduğu Salon</th>
-            <th>İşlemler</th>
+            <th class="text-center">İşlemler</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Ad)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Sure)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Ucret)
-                </td>
-                <td>
-                    @* Include(h => h.Salon) dediğimiz için burası çalışacak *@
-                    @Html.DisplayFor(modelItem => item.Salon.Ad)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info">Düzenle</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Detay</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Sil</a>
+                <td>@Html.DisplayFor(modelItem => item.Ad)</td>
+                <td>@Html.DisplayFor(modelItem => item.Sure)</td>
+                <td>@Html.DisplayFor(modelItem => item.Ucret)</td>
+                <td>@Html.DisplayFor(modelItem => item.Salon.Ad)</td>
+
+                @* İKONLU BUTON GRUBU *@
+                <td class="text-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning" title="Düzenle">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info text-white" title="Detaylar">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" title="Sil">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
         }

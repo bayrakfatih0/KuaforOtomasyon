@@ -1,11 +1,13 @@
 ﻿using Berber.Data; // Proje adınız
 using Berber.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // ToListAsync için
 using System.Diagnostics;
 
 namespace Berber.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

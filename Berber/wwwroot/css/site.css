@@ -1,4 +1,4 @@
-html {
+﻿html {
   font-size: 14px;
 }
 
@@ -20,3 +20,79 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Sidebar Genişliği ve Sabit Pozisyon Ayarları */
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 250px;
+    position: fixed; /* Sol bara sabitler */
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    /* Zephyr temasındaki primary rengi kullanır */
+    background-color: var(--bs-primary) !important;
+}
+
+/* Sidebar Başlığı */
+.sidebar-heading {
+    padding: 0.875rem 1.25rem;
+    font-size: 1.2rem;
+    color: #fff; /* Başlığı beyaz yapar */
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Yönetim Paneli Alt Başlıkları */
+.sidebar-subtitle {
+    font-size: 0.75rem;
+    color: #a0a0a0;
+    padding: 1rem 1.25rem 0.5rem;
+    font-weight: 600;
+}
+
+/* Navigasyon Linkleri */
+.list-group-item {
+    border: none; /* Kenarlık yok */
+    color: #fff !important;
+    background-color: var(--bs-primary) !important;
+    transition: background-color 0.2s;
+    font-size: 0.95rem;
+    padding: 0.75rem 1.25rem;
+}
+
+    .list-group-item:hover {
+        background-color: #3b87bc !important; /* Tema renginin biraz koyusu */
+        color: #fff !important;
+    }
+
+/* Sayfa İçeriği Alanı */
+#page-content-wrapper {
+    /* Sol çubuk kadar sağa kaydır */
+    margin-left: 250px;
+    padding: 0; /* İçerik alanının kendi padding'i olmamalı */
+    width: 100%; /* Kalan alana yayıl */
+    /* Header/Footer görünür olsun diye alttan da boşluk bırak */
+    padding-bottom: 60px;
+}
+
+/* Alt Çıkış/Ayarlar Bağlantıları */
+.sidebar-footer-links {
+    margin-top: auto; /* En alta iter */
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    .sidebar-footer-links .list-group-item {
+        font-size: 1rem;
+        padding: 1rem 1.25rem;
+        text-align: left;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Çıkış butonu form stilini temizler */
+    .sidebar-footer-links form button {
+        background-color: transparent !important;
+        text-align: left;
+        font-size: 0.95rem;
+    }

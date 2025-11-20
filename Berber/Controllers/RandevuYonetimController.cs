@@ -17,14 +17,24 @@ namespace Berber.Controllers
         }
 
         // GET: /RandevuYonetim/Index
+        // Controllers/RandevuYonetimController.cs - Index() metodu
+
+
+        // Controllers/RandevuYonetimController.cs - Index() metodu
+
         public async Task<IActionResult> Index()
         {
-            // Tüm randevuları çekiyoruz (Müşteri, Çalışan, Hizmet ve Salon bilgileriyle)
             var randevular = await _context.Randevular
-                .Include(r => r.Musteri) // Müşteri adını görmek için
-                .Include(r => r.Calisan).ThenInclude(c => c.Salon) // Salon adını da görmek için
-                .Include(r => r.Hizmet)
-                .OrderByDescending(r => r.TarihSaat) // En yeni randevu en üstte
+                .Where(r => r.TarihSaat.Date >= DateTime.Today)
+
+                // --- İLİŞKİLERİ GERİ YÜKLEDİK ---
+                .Include(r => r.Musteri) // Müşteri Ad/Email için
+                .Include(r => r.Hizmet) // Hizmet Adı için
+                .Include(r => r.Calisan) // Çalışan Adı için (Bu, Calisan.AdSoyad'ı çekmemizi sağlar)
+                                         // Not: Calisan.Salon.Ad ilişkisini kasten eklemiyoruz, çünkü o çöküyordu.
+
+                .OrderByDescending(r => r.Durum == OnayDurumu.Bekliyor)
+                .ThenBy(r => r.TarihSaat)
                 .ToListAsync();
 
             return View(randevular);

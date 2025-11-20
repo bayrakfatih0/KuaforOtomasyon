@@ -1,31 +1,32 @@
-// Gerekli kütüphaneleri en üste ekleyin
-using Berber.Data; // Proje adınız neyse ona göre düzeltin
-using Berber.Data.Initializers; // Proje adınız neyse ona göre düzeltin
-using Berber.Models; // Proje adınız neyse ona göre düzeltin
+// GEREKLİ KÜTÜPHANELER
+using Berber.Data;
+using Berber.Data.Initializers;
+using Berber.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection; // CreateScope için
-using Microsoft.Extensions.Logging; // ILogger için
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Berber.Services; // Kendi proje adınıza göre düzeltin
-using System; // Exception için
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Security.Claims; // FindFirstValue için
 
-// --- 1. Builder (İnşaatçı) Oluşturuluyor ---
+// --- 1. Builder (Inşaatçı) Oluşturuluyor ---
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 2. Servisler Ekleniyor ---
+// --- 2. SERVİSLER (Configuration) ---
 
 // Connection string'i appsettings.json'dan al
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// BİZİM DOĞRU VERİTABANI SINIFIMIZ: ApplicationDbContext
-// 'BerberContext' için olası bir kaydı SİLİYORUZ. Sadece bu kalmalı.
+// DBContext'i servislere ekle
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Identity'yi servislere ekle (ŞİFRE KURALLARIYLA BİRLİKTE)
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
-    // Geliştirme aşamasında şifre kurallarını basit tutuyoruz
+// Identity'yi servislere ekle (GLOBAL AUTHORIZATION ve COOKE AYARLARI)
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    // Şifre Ayarları
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
@@ -33,32 +34,42 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
     options.Password.RequireLowercase = false;
     options.Password.RequiredLength = 3;
 })
-    // DOĞRU VERİTABANI SINIFINI BURADA DA KULLAN
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// MVC servislerini ekle
+// KRİTİK YOL FİXİ: Yönlendirme yolları için ConfigureApplicationCookie kullanılır.
+
+
+// MVC Servisleri ve GLOBAL YETKİLENDİRME FİLTRESİ
 builder.Services.AddControllersWithViews();
 
-
-// Razor Pages servisini ekle (Login/Register sayfaları için)
+// Razor Pages servisini ekle (Identity UI için)
 builder.Services.AddRazorPages();
-
-// Sahte e-posta göndericimizi servislere ekliyoruz.
-builder.Services.AddSingleton<IEmailSender, DummyEmailSender>();
 
 
 // --- 3. Uygulama (app) İnşa Ediliyor ---
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    // Eğer gelen istek yanlış path'le başlıyorsa (yani /Account/Login'e gidiyorsa)
+    if (context.Request.Path.StartsWithSegments("/Account/Login"))
+    {
+        // Onu doğru adres olan /Identity/Account/Login'e yönlendir
+        context.Response.Redirect("/Identity/Account/Login");
+        return;
+    }
+    // İstek doğruysa normal akışa devam et
+    await next();
+});
+
 // --- 4. BAŞLANGIÇ VERİSİ (SEED DATA) KODU ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>(); // Bu hatayı çözmüştük
+    var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
     try
     {
-        logger.LogInformation("Başlangıç verisi (Seed) servisi çalıştırılıyor...");
         var context = services.GetRequiredService<ApplicationDbContext>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
@@ -70,10 +81,10 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Veritabanına başlangıç verisi eklenirken bir hata oluştu.");
     }
 }
-// --- BAŞLANGIÇ VERİSİ BİTİŞ ---
 
 
-// --- 5. Pipeline (Yönlendirme) Ayarları ---
+// --- 5. PIPELINE (İstek Sırası) AYARLARI ---
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -83,11 +94,16 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// 1. Yönlendirme (Routing)
 app.UseRouting();
 
+// 2. Kimlik Doğrulama (Authentication) - KİM olduğunu belirler
 app.UseAuthentication();
+
+// 3. Yetki Kontrolü (Authorization) - NE YAPABİLECEĞİNE karar verir
 app.UseAuthorization();
 
+// 4. Endpoint'leri (Controller'ları) haritala
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

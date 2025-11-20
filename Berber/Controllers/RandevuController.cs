@@ -120,18 +120,19 @@ namespace Berber.Controllers
         // ... (SaatSecimi metodunun altına ekleyin) ...
 
         // ADIM 4: RANDEVUYU ONAYLA VE KAYDET (POST)
+        // Controllers/RandevuController.cs - RandevuOnay metodu
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RandevuOnay(int calisanId, int hizmetId, int salonId, DateTime secilenTarih, string secilenSaat)
+        public async Task<IActionResult> RandevuOnay(
+            int calisanId, int hizmetId, int salonId,
+            DateTime secilenTarih, string secilenSaat)
         {
-            // 1. Gelen tarih ve saati birleştirme
-            // Saat string formatında (örn: "09:30") gelir, Time parçasına ayırıp birleştiriyoruz.
+            // 1. Gelen tarih ve saati birleştirme (Önceki kodunuz)
             if (!TimeSpan.TryParse(secilenSaat, out TimeSpan saatDilimi))
             {
-                // Eğer saat formatı yanlışsa, kullanıcıyı başa dönmeye zorla
                 return BadRequest("Geçersiz saat formatı.");
             }
-
             DateTime randevuTarihi = secilenTarih.Date.Add(saatDilimi);
 
             // 2. Randevu nesnesini oluşturma
@@ -140,20 +141,31 @@ namespace Berber.Controllers
                 TarihSaat = randevuTarihi,
                 CalisanId = calisanId,
                 HizmetId = hizmetId,
-                // Randevu oluşturulduğunda varsayılan olarak bekliyor durumundadır.
-                Durum = OnayDurumu.Bekliyor,
-
-                // Müşteri ID'sini, şu anda giriş yapan kullanıcıdan alıyoruz
-                MusteriId = User.FindFirstValue(ClaimTypes.NameIdentifier)!, // User.Identity'den gelen ID
+                Durum = OnayDurumu.Bekliyor, // Doğru duruma set ettik
+                MusteriId = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
             };
 
-            // 3. Veritabanına kaydetme
-            _context.Add(yeniRandevu);
-            await _context.SaveChangesAsync();
+            // --- BURASI KRİTİK NOKTA: SaveChanges'i Try/Catch ile koruyoruz ---
+            try
+            {
+                _context.Add(yeniRandevu);
+                await _context.SaveChangesAsync();
 
-            // 4. Müşteriyi bir onay sayfasına yönlendirme
-            // (Şimdilik Randevu Listesine yönlendiriyoruz, sonra teşekkür sayfası yaparız)
-            return RedirectToAction("RandevuOnaylandi", new { randevuId = yeniRandevu.Id });
+                // BAŞARI: Onay sayfasına yönlendir
+                return RedirectToAction("RandevuOnaylandi", new { randevuId = yeniRandevu.Id });
+            }
+            catch (Exception ex)
+            {
+                // HATA OLURSA, GELİŞTİRME EKRANINDA HATAYI GÖRMEK İÇİN
+                // View'a geri dönüyoruz. Normalde loglama yapılır.
+                ViewData["ErrorMessage"] = "Randevu kaydı sırasında beklenmedik bir veritabanı hatası oluştu. Lütfen girilen verileri kontrol edin.";
+
+                // Konsolda tam hatayı görmek için (Debug yapmıyorsak)
+                Console.WriteLine($"Randevu Kayıt Hatası: {ex.Message}");
+
+                // Hata View'ını göster
+                return View("Error"); // Projenizin varsayılan Error View'ına yönlendiriyoruz
+            }
         }
 
         // ... (Yeni bir onay sayfası ekleyelim) ...
@@ -250,6 +262,20 @@ namespace Berber.Controllers
                 .ToListAsync();
 
             return View(randevular);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> IptalEt(int id)
+        {
+            var randevu = await _context.Randevular.FindAsync(id);
+            if(randevu != null)
+            {
+                randevu.Durum = OnayDurumu.IptalEdildi;
+
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Randevularim));
         }
     }
 }

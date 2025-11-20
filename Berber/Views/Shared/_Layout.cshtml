@@ -1,74 +1,140 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+@* Layout'a giriş yapmış kullanıcının email adresini parçalayacak C# kodu ekliyoruz *@
+@{
+    string fullEmail = User.Identity?.Name ?? "";
+    // Eğer e-posta içeriyorsa (@ işareti), sadece öncesini al, yoksa tamamını göster.
+    string displayedUsername = fullEmail.Contains("@") ? fullEmail.Split('@')[0] : fullEmail;
+}
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Berber</title>
+    <title>@ViewData["Title"] - Berber Otomasyon Sistemi</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.2/zephyr/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Berber.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Berber</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Randevu" asp-action="Randevularim">Randevularım</a>
-                            </li>
-                        }
-                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Salon" asp-action="Index">Salon Yönetimi</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Hizmet" asp-action="Index">Hizmet Yönetimi</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Calisan" asp-action="Index">Çalışan Yönetimi</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-warning" asp-area="" asp-controller="RandevuYonetim" asp-action="Index">
-                                    <i class="fa-solid fa-calendar-check"></i> Randevu Onayları
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
+    @* Sol sabit bar ve sağ içerik için ana flex konteyner *@
+    <div class="d-flex" id="wrapper">
+
+        @* ==============================================
+           SOL SABİT BAR (SIDEBAR)
+           ============================================== *@
+        <nav id="sidebar-wrapper" class="bg-primary text-white border-right d-flex flex-column">
+
+            <div class="sidebar-heading">Berberim</div>
+
+            <div class="list-group list-group-flush flex-grow-1">
+
+                @* DASHBOARD / DASHBOARD *@
+                <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action text-white">
+                    <i class="fas fa-fw fa-tachometer-alt me-2"></i> Dashboard
+                </a>
+
+                @* MÜŞTERİ RANDEVULARI *@
+                @if (SignInManager.IsSignedIn(User) && !User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Randevu" asp-action="Randevularim" class="list-group-item list-group-item-action text-white">
+                        <i class="fas fa-fw fa-calendar-alt me-2"></i> Randevularım
+                    </a>
+                }
+
+                @* YÖNETİM LİNKLERİ (SADECE ADMIN) *@
+                @if (User.IsInRole("Admin"))
+                {
+                    <h6 class="sidebar-subtitle">YÖNETİM</h6>
+                    <a asp-controller="Salon" asp-action="Index" class="list-group-item list-group-item-action text-white">Salonlar</a>
+                    <a asp-controller="Hizmet" asp-action="Index" class="list-group-item list-group-item-action text-white">Hizmetler</a>
+                    <a asp-controller="Calisan" asp-action="Index" class="list-group-item list-group-item-action text-white">Çalışanlar</a>
+                    <a asp-controller="RandevuYonetim" asp-action="Index" class="list-group-item list-group-item-action text-white">Randevu Onayları</a>
+                }
+            </div>
+
+            @* 2. ALT NAVİGASYON (AYARLAR VE ÇIKIŞ) *@
+            <div class="sidebar-footer-links">
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    @* AYARLAR LİNKİ (Henüz yok, ama yerini ayırdık) *@
+                    <a href="#" class="list-group-item list-group-item-action text-white">
+                        <i class="fas fa-fw fa-cog me-2"></i> Ayarlar
+                    </a>
+
+                    @* ÇIKIŞ LİNKİ (LoginPartial'dan alınan form) *@
+                    <form id="logoutForm" class="form-inline m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/">
+                        <button id="logout" type="submit" class="list-group-item list-group-item-action text-white border-0 w-100">
+                            <i class="fas fa-fw fa-sign-out-alt me-2"></i> Çıkış
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login" class="list-group-item list-group-item-action text-white">
+                        <i class="fas fa-fw fa-sign-in-alt me-2"></i> Giriş Yap
+                    </a>
+                }
             </div>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        @* ==============================================
+           SAYFA İÇERİĞİ (SAĞ BÖLÜM)
+           ============================================== *@
+        <div id="page-content-wrapper" class="flex-grow-1">
+
+            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+                <div class="container-fluid">
+                    <h5 class="mb-0">@ViewData["Title"]</h5>
+
+                    @* --- ÜST NAVBAR İÇİNDEKİ UL LİSTESİ (BU KISIM DEĞİŞECEK) --- *@
+
+                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center">
+
+                        @* BİLDİRİM ZİLİ *@
+                        <li class="nav-item me-4">
+                            <a class="nav-link position-relative" href="#">
+                                <i class="fas fa-bell text-warning"></i>
+                            </a>
+                        </li>
+
+                        @* PROFİL VE DROPDOWN *@
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                           
+                                @* Yalnızca @ öncesi kullanıcı adını gösteriyoruz *@
+                                @displayedUsername
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="#">Profilim</a>
+                                <div class="dropdown-divider"></div>
+                                @* Not: Logout ve Ayarlar butonları sol altta durmaya devam ediyor. *@
+                                <a class="dropdown-item" href="#">Ayarlar</a>
+                            </div>
+                        </li>
+                    </ul>
+
+                    @* --- BİTİŞ --- *@
+                </div>
+            </nav>
+
+            <div class="container-fluid p-4">
+                @RenderBody()
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - Berber - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
