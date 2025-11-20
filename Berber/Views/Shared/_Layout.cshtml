@@ -26,6 +26,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Randevu" asp-action="Randevularim">Randevularım</a>
+                            </li>
+                        }
                         @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
@@ -36,6 +42,11 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Calisan" asp-action="Index">Çalışan Yönetimi</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" asp-area="" asp-controller="RandevuYonetim" asp-action="Index">
+                                    <i class="fa-solid fa-calendar-check"></i> Randevu Onayları
+                                </a>
                             </li>
                         }
                     </ul>

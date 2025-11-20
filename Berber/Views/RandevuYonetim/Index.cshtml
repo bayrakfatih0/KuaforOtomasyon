@@ -1,0 +1,81 @@
+﻿@model IEnumerable<Berber.Models.Randevu>
+
+@{
+    ViewData["Title"] = "Randevu Yönetimi";
+}
+
+<h1 class="mb-4">Gelen Randevular</h1>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-primary">
+            <tr>
+                <th>Tarih / Saat</th>
+                <th>Müşteri</th>
+                <th>Salon</th>
+                <th>Çalışan</th>
+                <th>Hizmet</th>
+                <th>Durum</th>
+                <th class="text-center">İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @* Tarihi ve saati güzel formatta göster *@
+                        <strong>@item.TarihSaat.ToString("dd.MM.yyyy")</strong>
+                        <br />
+                        <small>@item.TarihSaat.ToString("HH:mm")</small>
+                    </td>
+                    <td>@item.Musteri.Ad @item.Musteri.Soyad</td>
+                    <td>@item.Calisan.Salon.Ad</td>
+                    <td>@item.Calisan.AdSoyad</td>
+                    <td>@item.Hizmet.Ad</td>
+                    <td>
+                        @* Duruma göre renkli etiketler (Badge) *@
+                        @if (item.Durum == Berber.Models.OnayDurumu.Bekliyor)
+                        {
+                            <span class="badge bg-warning text-dark">Bekliyor</span>
+                        }
+                        else if (item.Durum == Berber.Models.OnayDurumu.Onaylandi)
+                        {
+                            <span class="badge bg-success">Onaylandı</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">İptal/Red</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        @if (item.Durum == Berber.Models.OnayDurumu.Bekliyor)
+                        {
+                            <div class="btn-group" role="group">
+                                @* ONAYLA BUTONU *@
+                                <form asp-action="Onayla" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-success btn-sm" title="Onayla">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </form>
+
+                                @* REDDET BUTONU *@
+                                <form asp-action="IptalEt" method="post" style="display:inline; margin-left:5px;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Reddet">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted"><small>İşlem Yapıldı</small></span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,51 @@
+﻿@model IEnumerable<Berber.Models.Hizmet>
+
+@{
+    ViewData["Title"] = "Hizmet Seçimi";
+    var salonAd = ViewData["SalonAd"];
+}
+
+<div class="text-center mb-4">
+    <h2 class="text-primary">@salonAd</h2>
+    <p class="lead">Lütfen almak istediğiniz hizmeti seçiniz (Adım 1/4)</p>
+
+    @* İlerleme Çubuğu (Görsellik için) *@
+    <div class="progress mb-3" style="height: 20px;">
+        <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">Hizmet</div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    @foreach (var hizmet in Model)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card border-info h-100 shadow-sm hover-effect">
+                <div class="card-body text-center">
+                    <h4 class="card-title">@hizmet.Ad</h4>
+                    <h3 class="text-success">@hizmet.Ucret TL</h3>
+                    <p class="text-muted"><i class="fa-regular fa-clock"></i> @hizmet.Sure Dakika</p>
+
+                    <hr />
+
+                    @* SEÇ BUTONU: 
+                       Bir sonraki adım olan "CalisanSec" sayfasına 
+                       hem HizmetId'yi hem de SalonId'yi taşıyoruz. 
+                    *@
+                    <a asp-action="CalisanSec"
+                       asp-route-hizmetId="@hizmet.Id"
+                       asp-route-salonId="@ViewData["SalonId"]"
+                       class="btn btn-lg btn-outline-primary w-100">
+                        Bu Hizmeti Seç <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning text-center">
+            Bu salona ait henüz bir hizmet tanımlanmamış.
+        </div>
+    }
+</div>

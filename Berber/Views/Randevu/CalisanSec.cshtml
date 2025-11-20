@@ -1,0 +1,63 @@
+﻿@model IEnumerable<Berber.Models.Calisan>
+
+@{
+    ViewData["Title"] = "Çalışan Seçimi";
+    var hizmetAd = ViewData["HizmetAd"];
+    var salonAd = ViewData["SalonAd"];
+    var hizmetId = ViewData["HizmetId"];
+    var salonId = ViewData["SalonId"];
+}
+
+<div class="text-center mb-4">
+    <h2 class="text-primary">@salonAd - @hizmetAd</h2>
+    <p class="lead">Bu hizmeti kimin yapmasını istersiniz? (Adım 2/4)</p>
+
+    @* İlerleme Çubuğu *@
+    <div class="progress mb-3" style="height: 20px;">
+        <div class="progress-bar bg-success" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">Çalışan</div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center">
+            <div class="alert alert-danger">
+                Seçtiğiniz hizmeti verebilecek müsait çalışan bulunmamaktadır. Lütfen yönetici ile iletişime geçiniz.
+            </div>
+        </div>
+    }
+
+    @foreach (var calisan in Model)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card border-info h-100 shadow-sm hover-effect">
+                <div class="card-body text-center">
+                    <h4 class="card-title text-info">@calisan.AdSoyad</h4>
+                    <p class="card-text text-muted">@calisan.UzmanlikAlanlari</p>
+
+                    <hr />
+
+                    @* SEÇ BUTONU:
+                       Bir sonraki adıma (Tarih/Saat Seçimi) 3 kritik bilgiyi taşıyoruz:
+                       SalonId, HizmetId, CalisanId
+                    *@
+                    <a asp-action="SaatSecimi"
+                       asp-route-hizmetId="@hizmetId"
+                       asp-route-salonId="@salonId"
+                       asp-route-calisanId="@calisan.Id"
+                       class="btn btn-lg btn-outline-primary w-100">
+                        @calisan.AdSoyad'ı Seç <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@* Geri Dön Butonu *@
+<div class="row justify-content-center mt-4">
+    <a asp-action="Index" asp-route-salonId="@salonId" class="btn btn-link">
+        <i class="fa-solid fa-arrow-left"></i> Hizmet Seçimine Geri Dön
+    </a>
+</div>

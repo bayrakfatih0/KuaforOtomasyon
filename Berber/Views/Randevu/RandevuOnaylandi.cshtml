@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Randevu Onaylandı";
+}
+
+<div class="text-center mt-5">
+    <i class="fa-regular fa-calendar-check fa-5x text-success mb-4"></i>
+    <h1 class="display-4 text-success">Randevunuz Başarıyla Alındı!</h1>
+    <p class="lead">Randevunuz şu anda yöneticinin onayını beklemektedir (Randevu Numaranız: @ViewData["RandevuId"]).</p>
+    <p>Lütfen randevu saatinden önce onay durumunu kontrol ediniz.</p>
+    <hr />
+
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">Ana Sayfaya Dön</a>
+</div>

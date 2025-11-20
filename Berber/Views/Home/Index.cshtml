@@ -1,8 +1,50 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<Berber.Models.Salon>
+
+@{
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-5">
+    <h1 class="display-4">Hoş Geldiniz</h1>
+    <p class="lead">Lütfen randevu almak istediğiniz salonumuzu seçin.</p>
+</div>
+
+@* Salonları Yan Yana Kartlar Halinde Göster *@
+<div class="row">
+    @foreach (var salon in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card border-primary h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">@salon.Ad</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>Adres:</strong> @salon.Adres
+                    </p>
+                    <p class="card-text">
+                        <small class="text-muted">Çalışma Saatleri: @salon.CalismaSaatleri</small>
+                    </p>
+                </div>
+                <div class="card-footer text-center bg-white border-0 pb-3">
+                    @* Müşteri "Randevu Al" butonuna bastığında:
+                       RandevuController'ın "Index" metoduna gidecek 
+                       ve seçtiği SalonId'yi de yanında götürecek.
+                    *@
+                    <a asp-controller="Randevu" asp-action="Index" asp-route-salonId="@salon.Id" class="btn btn-lg btn-primary w-100">
+                        Randevu Al
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center">
+            <div class="alert alert-warning">
+                Henüz sisteme kayıtlı bir salon bulunmamaktadır.
+            </div>
+        </div>
+    }
 </div>
