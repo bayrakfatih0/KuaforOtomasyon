@@ -128,44 +128,46 @@ namespace Berber.Controllers
             int calisanId, int hizmetId, int salonId,
             DateTime secilenTarih, string secilenSaat)
         {
-            // 1. Gelen tarih ve saati birleştirme (Önceki kodunuz)
+            // Veri toplama ve birleştirme
             if (!TimeSpan.TryParse(secilenSaat, out TimeSpan saatDilimi))
             {
                 return BadRequest("Geçersiz saat formatı.");
             }
             DateTime randevuTarihi = secilenTarih.Date.Add(saatDilimi);
 
-            // 2. Randevu nesnesini oluşturma
+            // Gerekli hizmet bilgisini çekme (Süre için)
+            var hizmet = await _context.Hizmetler.FindAsync(hizmetId);
+            if (hizmet == null) return NotFound("Hizmet bulunamadı.");
+
+            // --- KRİTİK KONTROL ÇAĞRISI ---
+            string? errorMessage = await CheckForConflictsAsync(randevuTarihi, calisanId, hizmet.Sure);
+
+            if (errorMessage != null)
+            {
+                // Eğer hata varsa (çakışma veya vardiya yok), mesajı TempData ile View'a taşı
+                TempData["ErrorMessage"] = errorMessage;
+
+                // Kullanıcıyı saat seçimi sayfasına geri yönlendir
+                return RedirectToAction(nameof(SaatSecimi), new { hizmetId, salonId, calisanId });
+            }
+            // --- KONTROL BİTTİ ---
+
+            // Randevu nesnesini oluşturma (Kontrol başarılı olduysa)
             var yeniRandevu = new Randevu
             {
                 TarihSaat = randevuTarihi,
                 CalisanId = calisanId,
                 HizmetId = hizmetId,
-                Durum = OnayDurumu.Bekliyor, // Doğru duruma set ettik
+                Durum = OnayDurumu.Bekliyor,
                 MusteriId = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
             };
 
-            // --- BURASI KRİTİK NOKTA: SaveChanges'i Try/Catch ile koruyoruz ---
-            try
-            {
-                _context.Add(yeniRandevu);
-                await _context.SaveChangesAsync();
+            // Veritabanına kaydetme
+            _context.Add(yeniRandevu);
+            await _context.SaveChangesAsync();
 
-                // BAŞARI: Onay sayfasına yönlendir
-                return RedirectToAction("RandevuOnaylandi", new { randevuId = yeniRandevu.Id });
-            }
-            catch (Exception ex)
-            {
-                // HATA OLURSA, GELİŞTİRME EKRANINDA HATAYI GÖRMEK İÇİN
-                // View'a geri dönüyoruz. Normalde loglama yapılır.
-                ViewData["ErrorMessage"] = "Randevu kaydı sırasında beklenmedik bir veritabanı hatası oluştu. Lütfen girilen verileri kontrol edin.";
-
-                // Konsolda tam hatayı görmek için (Debug yapmıyorsak)
-                Console.WriteLine($"Randevu Kayıt Hatası: {ex.Message}");
-
-                // Hata View'ını göster
-                return View("Error"); // Projenizin varsayılan Error View'ına yönlendiriyoruz
-            }
+            // Başarı: Onay sayfasına yönlendir
+            return RedirectToAction(nameof(RandevuOnaylandi), new { randevuId = yeniRandevu.Id });
         }
 
         // ... (Yeni bir onay sayfası ekleyelim) ...
@@ -276,6 +278,50 @@ namespace Berber.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Randevularim));
+        }
+
+
+        // Controllers/RandevuController.cs - Diğer metotların bittiği yere ekleyin
+
+        // Null dönerse çakışma yok demektir. String dönerse, o mesajı hata olarak gösteririz.
+        private async Task<string?> CheckForConflictsAsync(DateTime startTime, int calisanId, int serviceDuration)
+        {
+            // 1. Çalışma Saati Kontrolü: Çalışanın o gün vardiyası var mı?
+            var gun = startTime.DayOfWeek;
+            TimeSpan requestStartTime = startTime.TimeOfDay;
+            TimeSpan requestEndTime = requestStartTime.Add(TimeSpan.FromMinutes(serviceDuration));
+
+            // Uygunluk kaydının başlangıcı isteğimizden küçük OLMALI VE bitişi isteğimizden büyük OLMALI
+            var uygunluk = await _context.CalisanUygunluklari
+                .Where(u => u.CalisanId == calisanId && u.Gun == gun)
+                .FirstOrDefaultAsync(u => u.BaslangicSaati <= requestStartTime && u.BitisSaati >= requestEndTime);
+
+            if (uygunluk == null)
+            {
+                return "Çalışanın seçilen saatte tanımlı vardiyası bulunmamaktadır. Lütfen başka bir saat seçin.";
+            }
+
+            // 2. Çakışma Kontrolü: O saatte başka randevu var mı?
+            var doluRandevular = await _context.Randevular
+                .Include(r => r.Hizmet) // Mevcut randevunun süresini almak için Include
+                .Where(r => r.CalisanId == calisanId && r.TarihSaat.Date == startTime.Date)
+                .ToListAsync();
+
+            // Çakışma Formülü: (Yeni Başlangıç < Mevcut Bitiş) AND (Mevcut Başlangıç < Yeni Bitiş)
+            DateTime slotBitis = startTime.AddMinutes(serviceDuration);
+
+            bool conflictExists = doluRandevular.Any(existing =>
+            {
+                DateTime existingEndTime = existing.TarihSaat.AddMinutes(existing.Hizmet.Sure);
+                return (slotBitis > existing.TarihSaat && existingEndTime > startTime);
+            });
+
+            if (conflictExists)
+            {
+                return "Seçilen saat dilimi, mevcut bir randevu ile çakışmaktadır. Lütfen başka bir zaman seçin.";
+            }
+
+            return null; // Çakışma yok, her şey yolunda.
         }
     }
 }

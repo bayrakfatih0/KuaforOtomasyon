@@ -11,6 +11,14 @@
 }
 
 <h2 class="text-center mb-4">3. Adım: Tarih ve Saat Seçimi</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger text-center">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 <hr />
 
 <div class="alert alert-info">

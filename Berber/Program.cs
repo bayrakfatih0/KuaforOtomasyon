@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims; // FindFirstValue için
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Berber.Services; // Kendi proje adınızın services klasörünü temsil eder
 
 // --- 1. Builder (Inşaatçı) Oluşturuluyor ---
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +40,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 // KRİTİK YOL FİXİ: Yönlendirme yolları için ConfigureApplicationCookie kullanılır.
-
+builder.Services.AddSingleton<IEmailSender, DummyEmailSender>();
 
 // MVC Servisleri ve GLOBAL YETKİLENDİRME FİLTRESİ
 builder.Services.AddControllersWithViews();
