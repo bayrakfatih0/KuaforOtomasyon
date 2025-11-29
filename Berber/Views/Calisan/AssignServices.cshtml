@@ -2,12 +2,20 @@
 @* Model'e gerek yok, çünkü tüm veriyi ViewBag üzerinden alıyoruz *@
 
 @{
-    ViewData["Title"] = $"Hizmet Ata - {@ViewBag.CalisanAdSoyad}";
+    ViewData["Title"] = $"Hizmet Ata";
 }
+<div class="row">
+    <div class="col-12 mb-4">
 
-<h1>@ViewData["Title"]</h1>
-<p class="lead">Lütfen **@ViewBag.CalisanAdSoyad**'ın verebileceği hizmetleri seçin.</p>
-<hr />
+        @* 2. ALT BAŞLIK (Detay Bilgisi) *@
+        <h4 class="text-muted">
+            @ViewBag.CalisanAdSoyad -
+            @* Salon Adını ViewModel'den güvenli bir şekilde çekiyoruz *@
+            @ViewBag.SalonAdi
+        </h4>
+    </div>
+</div>
+
 
 <form asp-action="AssignServices" method="post">
     @Html.AntiForgeryToken()

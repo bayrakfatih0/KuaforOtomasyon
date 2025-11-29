@@ -173,7 +173,14 @@ namespace Berber.Controllers
             if (calisan == null) return NotFound();
 
             // 2. Tüm hizmetleri ve ait oldukları salonları çekiyoruz
-            var tumHizmetler = _context.Hizmetler.Include(h => h.Salon).ToList();
+            var calisanSalonId = calisan.SalonId;
+
+            // --- KRİTİK FİLTRELEME BURADA ---
+            // 2. SADECE bu Salon ID'si ile eşleşen hizmetleri çekiyoruz.
+            var tumHizmetler = _context.Hizmetler
+                .Where(h => h.SalonId == calisanSalonId) // <-- YENİ FİLTRELEME KURALI
+                .Include(h => h.Salon)
+                .ToList();
 
             // 3. View'a göndermek için List<HizmetAtamasi> yapısını View Bag ile oluşturuyoruz.
             // Bu, ViewModel kullanmadığımız için veriyi paketlemenin manuel yoludur.
@@ -188,15 +195,16 @@ namespace Berber.Controllers
                 atamaListesi.Add(new SelectListItem
                 {
                     Value = hizmet.Id.ToString(),
-                    Text = $"{hizmet.Ad} ({hizmet.Salon.Ad})",
+                    Text = $"{hizmet.Ad}", 
                     Selected = atandiMi // Atanmışsa Seçili (Checked) geliyor
                 });
             }
-
+            var salon = await _context.Salonlar.FirstOrDefaultAsync(p => p.Id == calisan.SalonId);
             // 4. Gerekli tüm bilgileri ViewBag/ViewData üzerinden taşı
             ViewBag.CalisanId = calisan.Id;
             ViewBag.CalisanAdSoyad = calisan.AdSoyad;
             ViewBag.HizmetAtamaListesi = atamaListesi; // Tüm hizmet listesi
+            ViewBag.SalonAdi = salon?.Ad;
 
             // Model olarak boş bir Calisan nesnesi veya sadece Id'yi gönderebiliriz.
             return View();
