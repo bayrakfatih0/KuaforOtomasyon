@@ -162,5 +162,84 @@ namespace Berber.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> AssignServices(int id)
+        {
+            // 1. Çalışanı ve mevcut atamalarını çekiyoruz
+            var calisan = await _context.Calisanlar
+                .Include(c => c.CalisanHizmetleri)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (calisan == null) return NotFound();
+
+            // 2. Tüm hizmetleri ve ait oldukları salonları çekiyoruz
+            var tumHizmetler = _context.Hizmetler.Include(h => h.Salon).ToList();
+
+            // 3. View'a göndermek için List<HizmetAtamasi> yapısını View Bag ile oluşturuyoruz.
+            // Bu, ViewModel kullanmadığımız için veriyi paketlemenin manuel yoludur.
+            var atamaListesi = new List<SelectListItem>();
+
+            foreach (var hizmet in tumHizmetler.OrderBy(h => h.Salon.Ad).ThenBy(h => h.Ad))
+            {
+                // Çalışana atanmış mı kontrolü
+                var atandiMi = calisan.CalisanHizmetleri
+                                      .Any(ch => ch.HizmetId == hizmet.Id);
+
+                atamaListesi.Add(new SelectListItem
+                {
+                    Value = hizmet.Id.ToString(),
+                    Text = $"{hizmet.Ad} ({hizmet.Salon.Ad})",
+                    Selected = atandiMi // Atanmışsa Seçili (Checked) geliyor
+                });
+            }
+
+            // 4. Gerekli tüm bilgileri ViewBag/ViewData üzerinden taşı
+            ViewBag.CalisanId = calisan.Id;
+            ViewBag.CalisanAdSoyad = calisan.AdSoyad;
+            ViewBag.HizmetAtamaListesi = atamaListesi; // Tüm hizmet listesi
+
+            // Model olarak boş bir Calisan nesnesi veya sadece Id'yi gönderebiliriz.
+            return View();
+        }
+
+        // Controllers/CalisanController.cs
+
+        // ... (AssignServices (GET) metodunun altı) ...
+
+        // POST: /Calisan/AssignServices/5
+        // Bu metot, formdan gelen CalisanId ve seçili HizmetId'lerin listesini alır.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignServices(int calisanId, List<int> HizmetIdler)
+        {
+            // 1. Çalışanı ve mevcut atamalarını veritabanından çek
+            var calisan = await _context.Calisanlar
+                .Include(c => c.CalisanHizmetleri)
+                .FirstOrDefaultAsync(c => c.Id == calisanId);
+
+            if (calisan == null) return NotFound();
+
+            // 2. Mevcut atamaları temizle
+            calisan.CalisanHizmetleri!.Clear();
+
+            // 3. Formdan gelen seçili HizmetId'leri tek tek ekle
+            if (HizmetIdler != null)
+            {
+                foreach (var hizmetId in HizmetIdler)
+                {
+                    calisan.CalisanHizmetleri.Add(new CalisanHizmet
+                    {
+                        CalisanId = calisanId,
+                        HizmetId = hizmetId
+                    });
+                }
+            }
+
+            // 4. Değişiklikleri veritabanına kaydet
+            await _context.SaveChangesAsync();
+
+            // Çalışan listesine geri dön
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

@@ -1,0 +1,60 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@* Model'e gerek yok, çünkü tüm veriyi ViewBag üzerinden alıyoruz *@
+
+@{
+    ViewData["Title"] = $"Hizmet Ata - {@ViewBag.CalisanAdSoyad}";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p class="lead">Lütfen **@ViewBag.CalisanAdSoyad**'ın verebileceği hizmetleri seçin.</p>
+<hr />
+
+<form asp-action="AssignServices" method="post">
+    @Html.AntiForgeryToken()
+
+    @* Çalışan ID'sini taşıyoruz (Gizli Alan) *@
+    <input type="hidden" name="CalisanId" value="@ViewBag.CalisanId" />
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            Atanacak Hizmetler
+        </div>
+        <div class="card-body">
+            <div class="row">
+
+                @* ViewBag'den gelen listeyi döngüye alıyoruz *@
+                @foreach (var hizmetItem in (ViewBag.HizmetAtamaListesi as List<SelectListItem>))
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check">
+
+                            @* Checkbox'ın Değeri: HizmetId'yi taşır. *@
+                            <input type="checkbox"
+                                   name="HizmetIdler" @* Controller'ın yakalayacağı alan adı *@
+                                   value="@hizmetItem.Value"
+                                   checked="@hizmetItem.Selected"
+                                   class="form-check-input" />
+
+                            @* Hizmet Adı ve Salon Adı (Label) *@
+                            <label class="form-check-label">
+                                @hizmetItem.Text
+                            </label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Atamaları Kaydet
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">İptal / Listeye Dön</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
