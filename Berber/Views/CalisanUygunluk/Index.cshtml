@@ -22,7 +22,6 @@
         @foreach (var item in Model)
         {
             <tr>
-                @* DayOfWeek İngilizce gelir (Monday), bunu Türkçeye çevirmek için basit bir yöntem *@
                 <td>
                     @System.Globalization.CultureInfo.GetCultureInfo("tr-TR").DateTimeFormat.DayNames[(int)item.Gun]
                 </td>
