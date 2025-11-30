@@ -28,7 +28,6 @@
                 <td>@item.BaslangicSaati.ToString(@"hh\:mm")</td>
                 <td>@item.BitisSaati.ToString(@"hh\:mm")</td>
                 <td>
-                    @* Silerken de hangi kaydı sildiğimizi yolluyoruz *@
                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Sil</a>
                 </td>
             </tr>
