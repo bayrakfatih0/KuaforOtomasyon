@@ -1,3 +1,100 @@
-Harika bir fikir. Kapsamlı bir README.md dosyası, projenizin değerini artırır ve gelecekteki geliştiricilerin (veya işe alım yöneticilerinin) mimariyi hızlıca anlamasını sağlar.İşte projenizin tüm detaylarını kapsayan, GitHub'a doğrudan yapıştırabileceğiniz README.md içeriği:💇‍♂️ Kuaför/Berber Otomasyon Sistemi (Appointment Automation System)📝 Proje Tanımı ve AmaçBu proje, bir veya birden fazla kuaför/berber salonunun randevu, çalışan ve hizmet yönetimini merkezileştiren platform bağımsız bir otomasyon sistemi geliştirmeyi amaçlamaktadır. Proje, nesneye dayalı programlama (OOP) ilkelerinin somut bir yazılım ürününe dönüştürülmesini göstermektedir.Temel Gereksinimler:Platform: ASP.NET Core 8 MVC (C#)Veritabanı: SQL Server (Entity Framework Core)Mimari: Rol tabanlı, Çoklu Salon Desteği (Multi-Tenancy)Kavramlar: Kalıtım, Polimorfizm ve Kapsülleme (Encapsulation) ilkelerinin uygulanması.🚀 Teknolojiler ve MimariAlanTeknoloji / YapıAçıklamaBackendC# .NET 8, ASP.NET Core MVCHızlı, ölçeklenebilir ve kurumsal seviyede backend framework.Veri ErişimEntity Framework Core (EF Core)Veritabanı işlemleri ve Model (sınıf) ile tablo eşleştirmesi.Kimlik/GüvenlikASP.NET Core IdentityRol tabanlı (RBAC) kimlik doğrulama ve yetkilendirme.Frontend/UIRazor Views, Bootstrap 5, Bootswatch (Zephyr Theme)Hızlı prototipleme ve modern, temiz Admin arayüzü.Veri AktarımıViewBag / ViewDataController'dan View'a veri taşıma yöntemi (Özellikle dropdown ve listeler için).✨ Temel Özellikler (Gereksinimler)Sistem, üç ana kullanıcı rolü (Admin, Çalışan, Müşteri) için tam işlevsellik sağlar:1. Yönetici Paneli (Admin / Salon Yöneticisi)Güvenlik: Tüm yönetim sayfaları [Authorize(Roles = "Admin")] ile korunur.Salon Yönetimi (CRUD): Yeni salonlar ekleme, düzenleme ve silme.Hizmet Yönetimi (CRUD): Salonlara özel hizmetleri (Ad, Süre, Ücret) tanımlama ve düzenleme. (decimal(18,2) hassasiyeti ile fiyat takibi).Çalışan Yönetimi (CRUD): Çalışan kaydı, uzmanlık alanlarının ve Salon bağlantısının yönetimi.Çalışan Yetkilendirme (Çoka-Çok): Çalışanlara hangi hizmetleri verebileceklerinin atanması (CalisanHizmet tablosu üzerinden).Vardiya Yönetimi: Her çalışanın müsait olduğu gün ve saat aralıklarının (CalisanUygunluk) yönetilmesi.Randevu Onayları: Gelen tüm müşteri randevularını listeleme ve Onayla/Reddet aksiyonları.2. Müşteri Randevu SihirbazıAdım 1: Salon Seçimi (Uygulamanın ana giriş noktası).Adım 2: Hizmet Seçimi.Adım 3: Çalışan Seçimi (Seçilen hizmeti veren, o salonda çalışan personelin filtrelenmesi).Adım 4: Tarih ve Saat Seçimi.KRİTİK LOGİK: Randevu Çakışma Kontrolü—Sistem, aynı çalışanın aynı anda veya hizmet süresi içinde başka bir randevu almasını engeller ve sadece vardiya saatleri içindeki boş dilimleri gösterir.Rol Ataması: Yeni kayıt olan her kullanıcıya otomatik olarak "Müşteri" rolü atanır.🗃️ Veritabanı Şeması ve Kritik İlişkilerProje, hizmet ve çalışan ilişkilerini yönetmek için iki ana ara tabloya odaklanmıştır:Varlık (Model)İlişkiAçıklamaSalon1 -- ∞Bir Salonun birden çok Çalışanı ve Hizmeti vardır.Calisan1 -- ∞Bir Çalışan, birden çok Randevu ve Uygunluk kaydına sahiptir. ApplicationUser ile 1:1 ilişkilidir.Hizmet∞ -- ∞Calisan ile Çoka-Çok ilişki.CalisanHizmetJOINTKritik: Hangi çalışanın hangi hizmeti verdiğini tutar.RandevuFKMusteriId (AspNetUsers), CalisanId ve HizmetId'yi bağlar.CalisanUygunlukFKÇalışanın müsaitlik vardiyalarını tutar (DayOfWeek, TimeSpan).⚙️ Kurulum ve BaşlatmaProjeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin.1. Ön Koşullar.NET 8 SDKVisual Studio 2022SQL Server LocalDB (veya SQL Server Management Studio)2. Veritabanı Yapılandırmasıappsettings.json dosyasını açın.DefaultConnection string'ini kendi SQL Server ayarlarınıza göre (genellikle (localdb)\mssqllocaldb kullanılır) güncelleyin.Projenin kök dizininde Package Manager Console'u açın ve Migration'ları çalıştırın:BashAdd-Migration FinalSetup # (Örnek isim, ilk defa yapılıyorsa InitialCreate olmalıdır)
-Update-Database
-3. Rollerin ve Admin Hesabının OluşturulmasıProje, ilk çalıştığında otomatik olarak Admin, Calisan, Musteri rollerini ve bir varsayılan Admin kullanıcısı oluşturur (bkz: DbInitializer.cs).4. Giriş (Login)Uygulamayı çalıştırın. Global yetkilendirme kuralı nedeniyle otomatik olarak Login sayfasına yönlendirileceksiniz.👤 Varsayılan Yönetici Giriş Bilgileri (Test)Kullanıcı AdıRolŞifreadmin@berber.comAdminYeniSifre123! (DbInitializer'dan sonraki şifre)personel@berber.comCalisanPersonel123!
+# KuaforOtomasyon
+
+## Project Title & Description
+
+This project, KuaforOtomasyon, appears to be a web application designed for managing a barber or hairdresser's business. While no explicit description was provided, the code structure suggests features like user authentication, account management, and potentially scheduling or customer management.
+
+## Key Features & Benefits
+
+Based on the code structure and file names, the anticipated features include:
+
+*   **User Authentication:** Secure login and logout functionality for users (barbers, administrators, etc.).
+*   **Account Management:** User profile management, including settings and information updates.
+*   **Potential Scheduling:** (Inferred) Functionality for managing appointments and availability.
+*   **Backend Logic (C#):** Robust backend operations and data management using C#.
+*   **Frontend Design (JavaScript, CSS):** User-friendly interface with potentially interactive elements.
+
+## Prerequisites & Dependencies
+
+To run this project, you will need the following:
+
+*   **.NET SDK:** The .NET SDK is required to build and run the C# backend.  Download from [https://dotnet.microsoft.com/download](https://dotnet.microsoft.com/download)
+*   **ASP.NET Core Runtime:**  This project uses ASP.NET Core. Ensure the runtime is installed.
+*   **A Code Editor:** Visual Studio, VS Code, or other C# compatible code editor.
+*   **A Database (Optional):** Depending on the intended data storage, a database system such as SQL Server, MySQL, or SQLite might be required. Connection strings will need to be configured appropriately.
+*   **Node.js and npm (Optional):** If using frontend package management, ensure Node.js and npm are installed.
+
+## Installation & Setup Instructions
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/bayrakfatih0/KuaforOtomasyon.git
+    cd KuaforOtomasyon
+    ```
+
+2.  **Restore Dependencies:**
+    ```bash
+    cd Berber
+    dotnet restore
+    ```
+
+3.  **Build the Project:**
+    ```bash
+    dotnet build
+    ```
+
+4.  **Apply Database Migrations (if applicable):**  If the project uses Entity Framework Core for database interactions, apply migrations.
+
+    ```bash
+    dotnet ef database update
+    ```
+    **Note:** You may need to install the Entity Framework Core tools first: `dotnet tool install --global dotnet-ef`
+
+5.  **Run the Application:**
+    ```bash
+    dotnet run
+    ```
+
+6.  **Access the Application:**  Open your web browser and navigate to the URL displayed in the console (usually `https://localhost:5001` or `http://localhost:5000`).
+
+## Usage Examples & API Documentation (if applicable)
+
+Due to the lack of detailed documentation, API endpoints are not readily available without further code inspection. However, typical ASP.NET Core Identity-based applications include endpoints for:
+
+*   `/Identity/Account/Login`: User login.
+*   `/Identity/Account/Logout`: User logout.
+*   `/Identity/Account/Register`: User registration.
+
+The frontend JavaScript (`Berber/wwwroot/js/site.js`) would interact with these endpoints using AJAX or similar techniques. Further analysis of the C# code (particularly within the `Berber/Areas/Identity/Pages/Account/` directory) would be required to fully document the API usage.
+
+## Configuration Options
+
+The primary configuration options are located in the `appsettings.json` file (not provided but typically present in ASP.NET Core projects). This file typically contains:
+
+*   **Connection Strings:** Database connection details.  Modify this to point to your database instance.
+*   **Logging Configuration:** Settings for logging levels and providers.
+*   **Identity Settings:**  Password policies, lockout settings, etc.  These can also be configured within the `Startup.cs` file or similar configuration classes.
+
+Environment variables can also be used to override configuration values.
+
+## Contributing Guidelines
+
+Contributions are welcome!  To contribute to this project:
+
+1.  Fork the repository.
+2.  Create a new branch for your feature or bug fix.
+3.  Implement your changes.
+4.  Write clear and concise commit messages.
+5.  Submit a pull request with a detailed explanation of your changes.
+
+Please adhere to the existing code style and conventions.  Ensure that your code is well-tested and documented.
+
+## License Information
+
+No license has been specified for this project. All rights are reserved by the owner `bayrakfatih0`.
+
+## Acknowledgments (if relevant)
+
+*   ASP.NET Core:  For providing the framework for building the backend.
+*   Bootstrap: For providing CSS styling.
+*   Contributors and users of this open-source project.
