@@ -13,7 +13,6 @@
     <dl class="row">
         <dt class="col-sm-2">Gün</dt>
         <dd class="col-sm-10">
-            @* İngilizce günü Türkçeye çevirerek göster *@
             @System.Globalization.CultureInfo.GetCultureInfo("tr-TR").DateTimeFormat.DayNames[(int)Model.Gun]
         </dd>
 
@@ -29,12 +28,10 @@
     </dl>
 
     <form asp-action="Delete">
-        @* Silinecek ID *@
         <input type="hidden" asp-for="Id" />
 
         <input type="submit" value="Evet, Sil" class="btn btn-danger" />
 
-        @* İptal ederse o çalışanın listesine dönsün *@
         <a asp-action="Index" asp-route-calisanId="@Model.CalisanId" class="btn btn-outline-secondary">İptal Et</a>
     </form>
 </div>

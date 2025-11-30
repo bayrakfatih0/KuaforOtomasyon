@@ -10,10 +10,10 @@ namespace Berber.Models
 
         [Required]
         [Display(Name = "Gün")]
-        public DayOfWeek Gun { get; set; } // Pazartesi, Salı... (0=Pazar, 1=Pazartesi)
+        public DayOfWeek Gun { get; set; } 
 
         [Required]
-        [DataType(DataType.Time)] // HTML'de saat seçici çıkmasını sağlar
+        [DataType(DataType.Time)] 
         [Display(Name = "Başlangıç Saati")]
         public TimeSpan BaslangicSaati { get; set; }
 
@@ -22,7 +22,6 @@ namespace Berber.Models
         [Display(Name = "Bitiş Saati")]
         public TimeSpan BitisSaati { get; set; }
 
-        // --- İLİŞKİ ---
         public int CalisanId { get; set; }
 
         [ForeignKey("CalisanId")]

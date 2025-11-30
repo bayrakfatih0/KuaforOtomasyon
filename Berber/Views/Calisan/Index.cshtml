@@ -29,25 +29,20 @@
                 <td>@Html.DisplayFor(modelItem => item.UzmanlikAlanlari)</td>
                 <td>@Html.DisplayFor(modelItem => item.Salon.Ad)</td>
 
-                @* İKONLU BUTON GRUBU VE ÖZEL BUTON *@
                 <td class="text-center">
                     <div class="btn-group btn-group-sm" role="group">
 
-                        @* --- YENİ EKLENEN HİZMET ATAMA BUTONU --- *@
                         <a asp-action="AssignServices" asp-route-id="@item.Id" class="btn btn-success" title="Hizmet Ata">
                             <i class="fa-solid fa-link"></i>
                         </a>
 
-                        @* SAATLER BUTONU *@
                         <a asp-controller="CalisanUygunluk" asp-action="Index" asp-route-calisanId="@item.Id" class="btn btn-success" title="Çalışma Saatleri">
                             <i class="fa-solid fa-clock"></i>
                         </a>
 
-                        @* Düzenle *@
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning" title="Düzenle">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        @* Sil *@
                         <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" title="Sil">
                             <i class="fa-solid fa-trash"></i>
                         </a>

@@ -5,7 +5,7 @@ namespace Berber.Models
 {
     public class Salon
     {
-        public int Id { get; set; } // Primary Key (Benzersiz ID)
+        public int Id { get; set; } 
 
         [Required(ErrorMessage = "Salon adı boş bırakılamaz.")]
         [StringLength(100)]
@@ -17,7 +17,7 @@ namespace Berber.Models
 
         [Required(ErrorMessage = "Çalışma saatleri boş bırakılamaz.")]
         [StringLength(50)]
-        public string CalismaSaatleri { get; set; } // "09:00-18:00" gibi
+        public string CalismaSaatleri { get; set; }
 
         
         public virtual ICollection<Calisan>? Calisanlar { get; set; }

@@ -1,4 +1,3 @@
-// GEREKLİ KÜTÜPHANELER
 using Berber.Data;
 using Berber.Data.Initializers;
 using Berber.Models;
@@ -9,26 +8,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Security.Claims; // FindFirstValue için
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Berber.Services; // Kendi proje adınızın services klasörünü temsil eder
+using Berber.Services; 
 
-// --- 1. Builder (Inşaatçı) Oluşturuluyor ---
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 2. SERVİSLER (Configuration) ---
 
-// Connection string'i appsettings.json'dan al
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// DBContext'i servislere ekle
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Identity'yi servislere ekle (GLOBAL AUTHORIZATION ve COOKE AYARLARI)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Şifre Ayarları
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
@@ -39,33 +32,25 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// KRİTİK YOL FİXİ: Yönlendirme yolları için ConfigureApplicationCookie kullanılır.
 builder.Services.AddSingleton<IEmailSender, DummyEmailSender>();
 
-// MVC Servisleri ve GLOBAL YETKİLENDİRME FİLTRESİ
 builder.Services.AddControllersWithViews();
 
-// Razor Pages servisini ekle (Identity UI için)
 builder.Services.AddRazorPages();
 
 
-// --- 3. Uygulama (app) İnşa Ediliyor ---
 var app = builder.Build();
 
 app.Use(async (context, next) =>
 {
-    // Eğer gelen istek yanlış path'le başlıyorsa (yani /Account/Login'e gidiyorsa)
     if (context.Request.Path.StartsWithSegments("/Account/Login"))
     {
-        // Onu doğru adres olan /Identity/Account/Login'e yönlendir
         context.Response.Redirect("/Identity/Account/Login");
         return;
     }
-    // İstek doğruysa normal akışa devam et
     await next();
 });
 
-// --- 4. BAŞLANGIÇ VERİSİ (SEED DATA) KODU ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -85,7 +70,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-// --- 5. PIPELINE (İstek Sırası) AYARLARI ---
 
 if (!app.Environment.IsDevelopment())
 {
@@ -96,21 +80,16 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// 1. Yönlendirme (Routing)
 app.UseRouting();
 
-// 2. Kimlik Doğrulama (Authentication) - KİM olduğunu belirler
 app.UseAuthentication();
 
-// 3. Yetki Kontrolü (Authorization) - NE YAPABİLECEĞİNE karar verir
 app.UseAuthorization();
 
-// 4. Endpoint'leri (Controller'ları) haritala
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 
-// --- 6. Uygulama Çalıştırılıyor ---
 app.Run();

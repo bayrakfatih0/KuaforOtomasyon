@@ -2,7 +2,7 @@
 using Berber.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering; // SelectList için
+using Microsoft.AspNetCore.Mvc.Rendering; 
 using Microsoft.EntityFrameworkCore;
 
 namespace Berber.Controllers
@@ -17,8 +17,6 @@ namespace Berber.Controllers
             _context = context;
         }
 
-        // GET: /CalisanUygunluk/Index?calisanId=5
-        // Bu sayfa parametre olarak MUTLAKA bir calisanId almalıdır.
         public async Task<IActionResult> Index(int? calisanId)
         {
             if (calisanId == null)
@@ -26,27 +24,23 @@ namespace Berber.Controllers
                 return NotFound();
             }
 
-            // 1. Seçilen çalışanın adını bulalım (Başlıkta göstermek için)
             var calisan = await _context.Calisanlar.FindAsync(calisanId);
             if (calisan == null)
             {
                 return NotFound();
             }
 
-            // Bu bilgiyi View'a taşıyalım ki "Ali Yılmaz'ın Saatleri" diyebilelim.
             ViewData["CalisanAd"] = calisan.AdSoyad;
             ViewData["CalisanId"] = calisan.Id;
 
-            // 2. SADECE bu çalışana ait saatleri getir
             var uygunluklar = _context.CalisanUygunluklari
                                       .Where(u => u.CalisanId == calisanId)
-                                      .OrderBy(u => u.Gun) // Güne göre sırala
-                                      .ThenBy(u => u.BaslangicSaati); // Sonra saate göre
+                                      .OrderBy(u => u.Gun) 
+                                      .ThenBy(u => u.BaslangicSaati); 
 
             return View(await uygunluklar.ToListAsync());
         }
 
-        // GET: /CalisanUygunluk/Create?calisanId=5
         public IActionResult Create(int? calisanId)
         {
             if (calisanId == null)
@@ -54,11 +48,8 @@ namespace Berber.Controllers
                 return NotFound();
             }
 
-            // 1. Hangi çalışana ekleme yapacağımızı View'a taşıyoruz
             ViewData["CalisanId"] = calisanId;
 
-            // 2. Günler için Türkçe bir liste hazırlayalım
-            // (DayOfWeek enum'u İngilizce olduğu için bunu elle yapıyoruz)
             var gunler = new List<SelectListItem>
             {
                 new SelectListItem { Value = "1", Text = "Pazartesi" },
@@ -75,12 +66,10 @@ namespace Berber.Controllers
             return View();
         }
 
-        // POST: /CalisanUygunluk/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CalisanUygunluk calisanUygunluk)
         {
-            // İlişkili "Calisan" nesnesi formdan null geleceği için doğrulamadan çıkarıyoruz
             ModelState.Remove("Calisan");
 
             if (ModelState.IsValid)
@@ -88,12 +77,9 @@ namespace Berber.Controllers
                 _context.Add(calisanUygunluk);
                 await _context.SaveChangesAsync();
 
-                // Kayıt bitti, tekrar o çalışanın saat listesine yönlendir
                 return RedirectToAction(nameof(Index), new { calisanId = calisanUygunluk.CalisanId });
             }
 
-            // Hata varsa dropdown'ı tekrar doldurmamız lazım (yoksa hata verir)
-            // (Burada tekrar aynı listeyi oluşturuyoruz)
             var gunler = new List<SelectListItem>
             {
                 new SelectListItem { Value = "1", Text = "Pazartesi" },
@@ -106,13 +92,11 @@ namespace Berber.Controllers
             };
             ViewData["Gunler"] = new SelectList(gunler, "Value", "Text", calisanUygunluk.Gun);
 
-            // CalisanId'yi de tekrar View'a taşı
             ViewData["CalisanId"] = calisanUygunluk.CalisanId;
 
             return View(calisanUygunluk);
         }
 
-        // GET: /CalisanUygunluk/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -120,7 +104,6 @@ namespace Berber.Controllers
                 return NotFound();
             }
 
-            // Silinecek kaydı ve kime ait olduğunu (Calisan) getir
             var uygunluk = await _context.CalisanUygunluklari
                 .Include(c => c.Calisan)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -133,27 +116,22 @@ namespace Berber.Controllers
             return View(uygunluk);
         }
 
-        // POST: /CalisanUygunluk/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var uygunluk = await _context.CalisanUygunluklari.FindAsync(id);
 
-            // Geri döneceğimiz çalışanın ID'sini saklayalım (varsayılan 0)
             int calisanId = 0;
 
             if (uygunluk != null)
             {
-                // 1. ID'yi kap (Silmeden önce!)
                 calisanId = uygunluk.CalisanId;
 
-                // 2. Kaydı sil
                 _context.CalisanUygunluklari.Remove(uygunluk);
                 await _context.SaveChangesAsync();
             }
 
-            // 3. Sakladığımız ID ile doğru listeye geri dön
             return RedirectToAction(nameof(Index), new { calisanId = calisanId });
         }
     }

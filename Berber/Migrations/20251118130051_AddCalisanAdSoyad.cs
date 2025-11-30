@@ -4,10 +4,10 @@
 
 namespace Berber.Migrations
 {
-    /// <inheritdoc />
+   
     public partial class AddCalisanAdSoyad : Migration
     {
-        /// <inheritdoc />
+      
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

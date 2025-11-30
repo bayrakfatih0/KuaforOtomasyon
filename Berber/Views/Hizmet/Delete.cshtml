@@ -19,9 +19,7 @@
         <dd class="col-sm-9">@Html.DisplayFor(model => model.Ucret) TL</dd>
     </dl>
 
-    @* Bu form, silme işlemini ONAYLAR *@
     <form asp-action="Delete">
-        @* Hangi hizmeti sileceğimizi bilmek için gizli Id'yi ekliyoruz *@
         <input type="hidden" asp-for="Id" />
 
         <input type="submit" value="Evet, Sil" class="btn btn-danger" />

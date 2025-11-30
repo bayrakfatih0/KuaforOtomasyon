@@ -11,10 +11,8 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            @* KRİTİK NOKTA: Hangi çalışana eklediğimizi UNUTMAMAK için *@
             <input type="hidden" asp-for="CalisanId" value="@ViewData["CalisanId"]" />
 
-            @* --- GÜN SEÇİMİ --- *@
             <div class="form-group mb-3">
                 <label asp-for="Gun" class="control-label">Gün</label>
                 <select asp-for="Gun" class="form-control" asp-items="ViewBag.Gunler">
@@ -23,14 +21,12 @@
                 <span asp-validation-for="Gun" class="text-danger"></span>
             </div>
 
-            @* --- BAŞLANGIÇ SAATİ --- *@
             <div class="form-group mb-3">
                 <label asp-for="BaslangicSaati" class="control-label">Başlangıç</label>
                 <input asp-for="BaslangicSaati" class="form-control" type="time" />
                 <span asp-validation-for="BaslangicSaati" class="text-danger"></span>
             </div>
 
-            @* --- BİTİŞ SAATİ --- *@
             <div class="form-group mb-3">
                 <label asp-for="BitisSaati" class="control-label">Bitiş</label>
                 <input asp-for="BitisSaati" class="form-control" type="time" />
@@ -39,7 +35,6 @@
 
             <div class="form-group mt-4">
                 <input type="submit" value="Ekle" class="btn btn-primary" />
-                @* İptal derse o çalışanın listesine geri dönsün *@
                 <a asp-action="Index" asp-route-calisanId="@ViewData["CalisanId"]" class="btn btn-outline-secondary">Listeye Dön</a>
             </div>
         </form>

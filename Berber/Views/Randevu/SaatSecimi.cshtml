@@ -1,6 +1,5 @@
 ﻿@{
     ViewData["Title"] = "3. Adım: Tarih ve Saat Seçimi";
-    // ViewData'dan kolay erişim için değişkenlere atıyoruz
     var calisanAd = ViewData["CalisanAd"];
     var hizmetAd = ViewData["HizmetAd"];
     var hizmetSure = ViewData["HizmetSuresi"];
@@ -30,13 +29,9 @@
     </p>
 </div>
 
-@* Views/Randevu/SaatSecimi.cshtml *@
-
-@* ... (Yukarıdaki özet kısmı aynı) ... *@
 
 <div class="row">
     <div class="col-md-12">
-        @* FORM 1: TARİH SEÇİMİ VE SAAT HESAPLAMASINI TETİKLEME *@
         <form asp-action="SaatSecimi" method="get">
             <input type="hidden" name="CalisanId" value="@ViewData["CalisanId"]" />
             <input type="hidden" name="HizmetId" value="@ViewData["HizmetId"]" />
@@ -45,7 +40,6 @@
             <div class="form-group mb-4">
                 <label name="secilenTarih" class="control-label">Randevu Tarihi</label>
                 <div class="input-group">
-                    @* Tarih seçildiğinde sayfayı yenilemek için "onchange" kullanıyoruz *@
                     <input type="date"
                            name="secilenTarih"
                            class="form-control"
@@ -56,7 +50,6 @@
             </div>
         </form>
 
-        @* FORM 2: SAAT SEÇİMİ VE ONAY *@
         <form asp-action="RandevuOnay" method="post">
             <input type="hidden" name="CalisanId" value="@ViewData["CalisanId"]" />
             <input type="hidden" name="HizmetId" value="@ViewData["HizmetId"]" />
@@ -65,7 +58,6 @@
 
             <h4>Müsait Saatler:</h4>
 
-            @* Saatleri gösterecek döngü *@
             <div class="d-flex flex-wrap gap-2 mb-4">
                 @if (ViewData["MusaitSaatler"] is List<string> musaitSaatler && musaitSaatler.Any())
                 {
@@ -86,7 +78,6 @@
             </div>
         </form>
 
-        @* Geri Dön Linki *@
         <a asp-action="CalisanSec" asp-route-hizmetId="@ViewData["HizmetId"]" asp-route-salonId="@ViewData["SalonId"]" class="btn btn-link mt-3">
             <i class="fa-solid fa-arrow-left"></i> Çalışan Seçimine Geri Dön
         </a>

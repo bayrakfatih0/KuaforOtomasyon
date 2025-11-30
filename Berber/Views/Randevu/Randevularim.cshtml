@@ -4,7 +4,6 @@
     ViewData["Title"] = "Randevularım";
 }
 
-@* Müşteri randevularını listelemek için standart şablonu uyguluyoruz *@
 <table class="table table-striped table-hover align-middle">
     <thead class="table-dark">
         <tr>
@@ -24,10 +23,8 @@
                 <td>@Html.DisplayFor(modelItem => item.Calisan.AdSoyad)</td>
                 <td>@Html.DisplayFor(modelItem => item.Hizmet.Salon.Ad)</td>
 
-                @* Tarih ve Saati formatlıyoruz *@
                 <td>@item.TarihSaat.ToString("dd.MM.yyyy") - @item.TarihSaat.ToString("HH:mm")</td>
 
-                @* Durumları görselleştiriyoruz *@
                 <td>
                     @if (item.Durum == Berber.Models.OnayDurumu.Bekliyor)
                     {
@@ -43,9 +40,7 @@
                     }
                 </td>
 
-                @* Randevu iptal butonu *@
                 <td class="text-center">
-                    @* Sadece onaylanmamış randevular iptal edilebilir *@
                     @if (item.Durum == Berber.Models.OnayDurumu.Bekliyor || item.Durum == Berber.Models.OnayDurumu.Onaylandi)
                     {
                         <form asp-controller="Randevu" asp-action="IptalEt" method="post" style="display:inline;">

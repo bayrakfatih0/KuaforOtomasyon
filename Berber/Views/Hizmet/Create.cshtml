@@ -9,16 +9,10 @@
 <div class="row">
     <div class="col-md-6">
         <form asp-action="Create">
-            @* Hata özetlerini (örn: "Ücret zorunludur") en üstte göster *@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            @* AÇILIR LİSTE (DROPDOWN) *@
             <div class="form-group mb-3">
                 <label asp-for="SalonId" class="control-label"></label>
-                @* Bu <select> etiketi, Controller'da hazırladığımız
-                  ViewData["SalonId"]'yi otomatik olarak alıp seçeneklere (option)
-                  dönüştürecek.
-                *@
                 <select asp-for="SalonId" class="form-control" asp-items="ViewBag.SalonId">
                     <option value="">-- Lütfen Bir Salon Seçin --</option>
                 </select>
@@ -51,7 +45,6 @@
     </div>
 </div>
 
-@* Doğrulama (validation) script'lerini etkinleştirmek için *@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

@@ -4,21 +4,14 @@
     ViewData["Title"] = "Ana Sayfa";
 }
 
-@* --- 1. ADMIN/KULLANICI ROL KONTROLÜ --- *@
-
-@* Eğer ADMIN ise, SADECE DASHBOARD KARTLARINI GÖSTER *@
 @if (User.IsInRole("Admin"))
 {
-    @* Sizin gönderdiğiniz Özet Kartları Kodu *@
     <div class="row">
         <div class="col-12 mb-4">
             <h1>Yönetici Dashboard</h1>
             <p class="lead">Sistem özetini aşağıda görebilirsiniz.</p>
         </div>
         
-        @* Bu kısım, Toplam Bekleyen Randevu, Çalışan Sayısı vb. static kartları içerir *@
-        
-        @* 1. Bekleyen Randevu Sayısı *@
         <div class="col-xl-3 col-md-6 mb-4">
              <div class="card border-left-primary shadow h-100 py-2">
                  <div class="card-body">
@@ -33,8 +26,6 @@
              </div>
         </div>
         
-        @* ... (Diğer Özet Kartları: Çalışan Sayısı, Müşteri Sayısı) ... *@
-        @* Kullanıcının gönderdiği kodda olan diğer kartlar buraya eklenebilir *@
         
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
@@ -70,7 +61,6 @@
         <p class="lead">Lütfen randevu almak istediğiniz salonumuzu seçin.</p>
     </div>
 
-    @* Salonları Yan Yana Kartlar Halinde Göster *@
     <div class="row">
         @foreach (var salon in Model)
         {
@@ -89,10 +79,8 @@
                     </div>
                     <div class="card-footer text-center bg-white border-0 pb-3">
 
-                        @* SADECE GİRİŞ YAPMIŞ VE ADMIN OLMAYANLARA GÖSTER *@
                         @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
                         {
-                            @* --- HATA GİDERME: URL'Yİ MANUEL YAZIYORUZ --- *@
                             <a href="/Randevu/Index?salonId=@salon.Id"
                                class="btn btn-lg btn-primary w-100">
                                 Randevu Al
@@ -100,7 +88,6 @@
                         }
                         else
                         {
-                            @* Giriş Yapılmamışsa Login sayfasına yönlendir (Bu zaten çalışıyordu) *@
                             <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-lg btn-secondary w-100">
                                 Giriş Yap & Randevu Al
                             </a>

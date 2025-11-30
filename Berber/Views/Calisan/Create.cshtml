@@ -11,21 +11,18 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            @* --- AD SOYAD ALANI --- *@
             <div class="form-group mb-3">
                 <label asp-for="AdSoyad" class="control-label"></label>
                 <input asp-for="AdSoyad" class="form-control" placeholder="Örn: Ahmet Yılmaz" />
                 <span asp-validation-for="AdSoyad" class="text-danger"></span>
             </div>
 
-            @* --- UZMANLIK ALANLARI --- *@
             <div class="form-group mb-3">
                 <label asp-for="UzmanlikAlanlari" class="control-label"></label>
                 <input asp-for="UzmanlikAlanlari" class="form-control" placeholder="Örn: Saç Kesimi, Boya" />
                 <span asp-validation-for="UzmanlikAlanlari" class="text-danger"></span>
             </div>
 
-            @* --- SALON SEÇİMİ (Açılır Liste) --- *@
             <div class="form-group mb-3">
                 <label asp-for="SalonId" class="control-label">Bağlı Olduğu Salon</label>
                 <select asp-for="SalonId" class="form-control" asp-items="ViewBag.SalonId">
@@ -34,7 +31,6 @@
                 <span asp-validation-for="SalonId" class="text-danger"></span>
             </div>
 
-            @* --- BUTONLAR --- *@
             <div class="form-group mt-4">
                 <input type="submit" value="Kaydet" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-outline-secondary">Listeye Dön</a>

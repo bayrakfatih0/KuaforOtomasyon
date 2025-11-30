@@ -1,5 +1,4 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Rendering
-@* Model'e gerek yok, çünkü tüm veriyi ViewBag üzerinden alıyoruz *@
 
 @{
     ViewData["Title"] = $"Hizmet Ata";
@@ -7,10 +6,8 @@
 <div class="row">
     <div class="col-12 mb-4">
 
-        @* 2. ALT BAŞLIK (Detay Bilgisi) *@
         <h4 class="text-muted">
             @ViewBag.CalisanAdSoyad -
-            @* Salon Adını ViewModel'den güvenli bir şekilde çekiyoruz *@
             @ViewBag.SalonAdi
         </h4>
     </div>
@@ -20,7 +17,6 @@
 <form asp-action="AssignServices" method="post">
     @Html.AntiForgeryToken()
 
-    @* Çalışan ID'sini taşıyoruz (Gizli Alan) *@
     <input type="hidden" name="CalisanId" value="@ViewBag.CalisanId" />
 
     <div class="card shadow mb-4">
@@ -30,20 +26,17 @@
         <div class="card-body">
             <div class="row">
 
-                @* ViewBag'den gelen listeyi döngüye alıyoruz *@
                 @foreach (var hizmetItem in (ViewBag.HizmetAtamaListesi as List<SelectListItem>))
                 {
                     <div class="col-md-4 mb-3">
                         <div class="form-check">
 
-                            @* Checkbox'ın Değeri: HizmetId'yi taşır. *@
                             <input type="checkbox"
-                                   name="HizmetIdler" @* Controller'ın yakalayacağı alan adı *@
+                                   name="HizmetIdler" 
                                    value="@hizmetItem.Value"
                                    checked="@hizmetItem.Selected"
                                    class="form-check-input" />
 
-                            @* Hizmet Adı ve Salon Adı (Label) *@
                             <label class="form-check-label">
                                 @hizmetItem.Text
                             </label>

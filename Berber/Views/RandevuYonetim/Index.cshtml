@@ -22,21 +22,16 @@
         {
             <tr>
                 <td>
-                    @* Güvenli gösterim için Email'i kullanıyoruz *@
                     @Html.DisplayFor(modelItem => item.Musteri.Email)
                 </td>
 
-                @* 2. ÇALIŞAN ADI *@
                 <td>@Html.DisplayFor(modelItem => item.Calisan.AdSoyad)</td>
 
-                @* 3. HİZMET ADI *@
                 <td>@Html.DisplayFor(modelItem => item.Hizmet.Ad)</td>
 
-                @* TarihSaat Kullanımı Düzeltildi *@
                 <td>@item.TarihSaat.ToString("dd.MM.yyyy") - @item.TarihSaat.ToString("HH:mm")</td>
 
                 <td>
-                    @* Durumları Enum ile karşılaştırıp görselleştiriyoruz *@
                     @if (item.Durum == Berber.Models.OnayDurumu.Bekliyor)
                     {
                         <span class="badge bg-warning text-dark">Onay Bekliyor</span>
@@ -54,21 +49,18 @@
                 <td class="text-center">
                     <div class="btn-group btn-group-sm" role="group">
 
-                        @* Sadece Onay Bekleyenlere işlem butonu göster *@
                         @if (item.Durum == Berber.Models.OnayDurumu.Bekliyor)
                         {
-                            @* ONAYLA BUTONU (POST) *@
                             <form asp-action="Onayla" method="post" style="display:inline;">
-                                @Html.AntiForgeryToken() @* Güvenlik Tokeni Eklendi *@
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@item.Id" />
                                 <button type="submit" class="btn btn-success" title="Randevuyu Onayla">
                                     <i class="fa-solid fa-check"></i>
                                 </button>
                             </form>
 
-                            @* REDDET BUTONU (POST) *@
                             <form asp-action="IptalEt" method="post" style="display:inline; margin-left:5px;">
-                                @Html.AntiForgeryToken() @* Güvenlik Tokeni Eklendi *@
+                                @Html.AntiForgeryToken() 
                                 <input type="hidden" name="id" value="@item.Id" />
                                 <button type="submit" class="btn btn-danger" title="Randevuyu Reddet">
                                     <i class="fa-solid fa-xmark"></i>

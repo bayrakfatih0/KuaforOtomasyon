@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Berber.Controllers
 {
-    [Authorize(Roles = "Admin")] // Sadece Admin girebilir
+    [Authorize(Roles = "Admin")] 
     public class RandevuYonetimController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,23 +16,15 @@ namespace Berber.Controllers
             _context = context;
         }
 
-        // GET: /RandevuYonetim/Index
-        // Controllers/RandevuYonetimController.cs - Index() metodu
-
-
-        // Controllers/RandevuYonetimController.cs - Index() metodu
 
         public async Task<IActionResult> Index()
         {
             var randevular = await _context.Randevular
                 .Where(r => r.TarihSaat.Date >= DateTime.Today)
 
-                // --- İLİŞKİLERİ GERİ YÜKLEDİK ---
-                .Include(r => r.Musteri) // Müşteri Ad/Email için
-                .Include(r => r.Hizmet) // Hizmet Adı için
-                .Include(r => r.Calisan) // Çalışan Adı için (Bu, Calisan.AdSoyad'ı çekmemizi sağlar)
-                                         // Not: Calisan.Salon.Ad ilişkisini kasten eklemiyoruz, çünkü o çöküyordu.
-
+                .Include(r => r.Musteri) 
+                .Include(r => r.Hizmet) 
+                .Include(r => r.Calisan)
                 .OrderByDescending(r => r.Durum == OnayDurumu.Bekliyor)
                 .ThenBy(r => r.TarihSaat)
                 .ToListAsync();
@@ -40,7 +32,6 @@ namespace Berber.Controllers
             return View(randevular);
         }
 
-        // POST: Randevuyu Onayla
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Onayla(int id)
@@ -54,7 +45,6 @@ namespace Berber.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Randevuyu İptal Et
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> IptalEt(int id)

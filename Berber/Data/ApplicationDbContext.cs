@@ -4,9 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Berber.Data
 {
-    // ÖNEMLİ: DbContext değil, IdentityDbContext<ApplicationUser> kullanıyoruz.
-    // Bu, hem bizim tablolarımızı hem de Identity'nin (Kullanıcı, Rol) tablolarını
-    // aynı veritabanında yönetmesini sağlar.
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -14,8 +11,6 @@ namespace Berber.Data
         {
         }
 
-        // Yukarıda "Models" klasöründe oluşturduğumuz her sınıfı
-        // buraya DbSet olarak eklemeliyiz.
         public DbSet<Salon> Salonlar { get; set; }
         public DbSet<Hizmet> Hizmetler { get; set; }
         public DbSet<Calisan> Calisanlar { get; set; }
@@ -23,14 +18,10 @@ namespace Berber.Data
         public DbSet<CalisanUygunluk> CalisanUygunluklari { get; set; }
         public DbSet<CalisanHizmet> CalisanHizmetleri { get; set; }
 
-
-        // Çoka-çok ilişki için anahtar tanımlaması
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // CalisanHizmet tablosu için birleşik birincil anahtar (composite key)
-            // (CalisanId + HizmetId) ikilisi benzersiz olmalı.
             builder.Entity<CalisanHizmet>()
                 .HasKey(ch => new { ch.CalisanId, ch.HizmetId });
 
@@ -39,16 +30,16 @@ namespace Berber.Data
                 .HasColumnType("decimal(18, 2)");
 
             builder.Entity<CalisanHizmet>()
-                .HasOne(ch => ch.Hizmet) // CalisanHizmet'in bir Hizmet'i vardır
-                .WithMany(h => h.CalisanHizmetleri) // Hizmet'in birçok CalisanHizmet'i vardır
-                .HasForeignKey(ch => ch.HizmetId) // Bağlantı anahtarı
-                .OnDelete(DeleteBehavior.NoAction); // <-- İŞTE ÇÖZÜM BU SATIR
+                .HasOne(ch => ch.Hizmet) 
+                .WithMany(h => h.CalisanHizmetleri) 
+                .HasForeignKey(ch => ch.HizmetId) 
+                .OnDelete(DeleteBehavior.NoAction); 
 
             builder.Entity<Randevu>()
-                .HasOne(r => r.Calisan) // Randevu'nun bir Calisan'ı var
-                .WithMany(c => c.Randevular) // Calisan'ın çok Randevu'su var
-                .HasForeignKey(r => r.CalisanId) // Bağlantı anahtarı
-                .OnDelete(DeleteBehavior.NoAction); // <-- YENİ KURALIMIZ BU
+                .HasOne(r => r.Calisan) 
+                .WithMany(c => c.Randevular) 
+                .HasForeignKey(r => r.CalisanId) 
+                .OnDelete(DeleteBehavior.NoAction); 
         }
     }
 }

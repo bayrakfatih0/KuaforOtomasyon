@@ -6,10 +6,8 @@
 @inject IHttpContextAccessor HttpContextAccessor
 
 <!DOCTYPE html>
-@* Layout'a giriş yapmış kullanıcının email adresini parçalayacak C# kodu ekliyoruz *@
 @{
     string fullEmail = User.Identity?.Name ?? "";
-    // Eğer e-posta içeriyorsa (@ işareti), sadece öncesini al, yoksa tamamını göster.
     string displayedUsername = fullEmail.Contains("@") ? fullEmail.Split('@')[0] : fullEmail;
 }
 <html lang="tr">
@@ -25,24 +23,17 @@
     <link rel="stylesheet" href="~/Berber.styles.css" asp-append-version="true" />
 </head>
 <body>
-    @* Sol sabit bar ve sağ içerik için ana flex konteyner *@
     <div class="d-flex" id="wrapper">
-
-        @* ==============================================
-           SOL SABİT BAR (SIDEBAR)
-           ============================================== *@
         <nav id="sidebar-wrapper" class="bg-primary text-white border-right d-flex flex-column">
 
             <div class="sidebar-heading">Berberim</div>
 
             <div class="list-group list-group-flush flex-grow-1">
 
-                @* DASHBOARD / DASHBOARD *@
                 <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action text-white">
                     <i class="fas fa-fw fa-tachometer-alt me-2"></i> Dashboard
                 </a>
 
-                @* MÜŞTERİ RANDEVULARI *@
                 @if (SignInManager.IsSignedIn(User) && !User.IsInRole("Admin"))
                 {
                     <a asp-controller="Randevu" asp-action="Randevularim" class="list-group-item list-group-item-action text-white">
@@ -50,7 +41,6 @@
                     </a>
                 }
 
-                @* YÖNETİM LİNKLERİ (SADECE ADMIN) *@
                 @if (User.IsInRole("Admin"))
                 {
                     <h6 class="sidebar-subtitle">YÖNETİM</h6>
@@ -61,16 +51,13 @@
                 }
             </div>
 
-            @* 2. ALT NAVİGASYON (AYARLAR VE ÇIKIŞ) *@
             <div class="sidebar-footer-links">
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    @* AYARLAR LİNKİ (Henüz yok, ama yerini ayırdık) *@
                     <a href="#" class="list-group-item list-group-item-action text-white">
                         <i class="fas fa-fw fa-cog me-2"></i> Ayarlar
                     </a>
 
-                    @* ÇIKIŞ LİNKİ (LoginPartial'dan alınan form) *@
                     <form id="logoutForm" class="form-inline m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/">
                         <button id="logout" type="submit" class="list-group-item list-group-item-action text-white border-0 w-100">
                             <i class="fas fa-fw fa-sign-out-alt me-2"></i> Çıkış
@@ -85,43 +72,34 @@
                 }
             </div>
         </nav>
-        @* ==============================================
-           SAYFA İÇERİĞİ (SAĞ BÖLÜM)
-           ============================================== *@
         <div id="page-content-wrapper" class="flex-grow-1">
 
             <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
                 <div class="container-fluid">
                     <h5 class="mb-0">@ViewData["Title"]</h5>
 
-                    @* --- ÜST NAVBAR İÇİNDEKİ UL LİSTESİ (BU KISIM DEĞİŞECEK) --- *@
 
                     <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center">
 
-                        @* BİLDİRİM ZİLİ *@
                         <li class="nav-item me-4">
                             <a class="nav-link position-relative" href="#">
                                 <i class="fas fa-bell text-warning"></i>
                             </a>
                         </li>
 
-                        @* PROFİL VE DROPDOWN *@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                            
-                                @* Yalnızca @ öncesi kullanıcı adını gösteriyoruz *@
                                 @displayedUsername
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <a class="dropdown-item" href="#">Profilim</a>
                                 <div class="dropdown-divider"></div>
-                                @* Not: Logout ve Ayarlar butonları sol altta durmaya devam ediyor. *@
                                 <a class="dropdown-item" href="#">Ayarlar</a>
                             </div>
                         </li>
                     </ul>
 
-                    @* --- BİTİŞ --- *@
                 </div>
             </nav>
 

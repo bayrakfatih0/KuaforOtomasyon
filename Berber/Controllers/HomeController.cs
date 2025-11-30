@@ -1,8 +1,8 @@
-﻿using Berber.Data; // Proje adınız
+﻿using Berber.Data; 
 using Berber.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // ToListAsync için
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace Berber.Controllers
@@ -12,19 +12,16 @@ namespace Berber.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        // 1. Veritabanı bağlantısını ekliyoruz
         private readonly ApplicationDbContext _context;
 
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
             _logger = logger;
-            _context = context; // Bağlantıyı al
+            _context = context; 
         }
 
-        // 2. Ana Sayfa (Index) açıldığında çalışacak kod
         public async Task<IActionResult> Index()
         {
-            // Veritabanındaki tüm salonları çekip View'a gönderiyoruz
             var salonlar = await _context.Salonlar.ToListAsync();
             return View(salonlar);
         }

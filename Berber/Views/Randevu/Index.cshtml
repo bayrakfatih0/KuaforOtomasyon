@@ -9,7 +9,6 @@
     <h2 class="text-primary">@salonAd</h2>
     <p class="lead">Lütfen almak istediğiniz hizmeti seçiniz (Adım 1/4)</p>
 
-    @* İlerleme Çubuğu (Görsellik için) *@
     <div class="progress mb-3" style="height: 20px;">
         <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">Hizmet</div>
     </div>
@@ -27,10 +26,6 @@
 
                     <hr />
 
-                    @* SEÇ BUTONU: 
-                       Bir sonraki adım olan "CalisanSec" sayfasına 
-                       hem HizmetId'yi hem de SalonId'yi taşıyoruz. 
-                    *@
                     <a asp-action="CalisanSec"
                        asp-route-hizmetId="@hizmet.Id"
                        asp-route-salonId="@ViewData["SalonId"]"

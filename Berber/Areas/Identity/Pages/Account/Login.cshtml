@@ -3,7 +3,6 @@
 
 @{
     ViewData["Title"] = "Giriş Yap";
-    // Bu sayfanın layout'u ViewStart'ta ayarlandı
 }
 
 <div class="card shadow" style="max-width: 420px; width: 100%;">
@@ -14,24 +13,20 @@
     <div class="card-body p-4">
         <section>
             <form id="account" method="post">
-                @* Hata Özeti *@
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-                @* E-posta *@
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                     <label asp-for="Input.Email" class="form-label">E-posta</label>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
 
-                @* Şifre *@
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="şifre" />
                     <label asp-for="Input.Password" class="form-label">Şifre</label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
 
-                @* Beni Hatırla *@
                 <div class="checkbox mb-3">
                     <label asp-for="Input.RememberMe" class="form-label">
                         <input class="form-check-input" asp-for="Input.RememberMe" />
@@ -39,7 +34,6 @@
                     </label>
                 </div>
 
-                @* Giriş Butonu *@
                 <div>
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-success">Giriş Yap</button>
                 </div>

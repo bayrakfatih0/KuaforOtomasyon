@@ -1,13 +1,12 @@
-﻿using Berber.Models; // Proje adınız neyse ona göre düzeltin
+﻿using Berber.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Berber.Data.Initializers // Proje adınız neyse ona göre düzeltin
+namespace Berber.Data.Initializers 
 {
     public static class DbInitializer
     {
-        // Logger'ı (ApplicationDbContext) olarak bıraktık, bu doğru
         public static async Task Initialize(ApplicationDbContext context,
                                             UserManager<ApplicationUser> userManager,
                                             RoleManager<IdentityRole> roleManager,
@@ -15,11 +14,9 @@ namespace Berber.Data.Initializers // Proje adınız neyse ona göre düzeltin
         {
             try
             {
-                // 1. Veritabanı migrasyonu (Aynı)
                 await context.Database.MigrateAsync();
                 logger.LogInformation("Veritabanı migrasyonu kontrol edildi/uygulandı...");
 
-                // 2. Rolleri Oluştur (Aynı)
                 string[] roleNames = { "Admin", "Calisan", "Musteri" };
                 foreach (var roleName in roleNames)
                 {
@@ -30,12 +27,8 @@ namespace Berber.Data.Initializers // Proje adınız neyse ona göre düzeltin
                     }
                 }
 
-                // 3. YENİ MANTIK: Admin Kullanıcısını ve Rolünü Kontrol Et
-
-                // Önce kullanıcıyı bul
                 var adminUser = await userManager.FindByEmailAsync("admin@berber.com");
 
-                // Eğer kullanıcı HİÇ yoksa, oluştur
                 if (adminUser == null)
                 {
                     logger.LogInformation("Varsayılan Admin kullanıcısı oluşturuluyor...");
@@ -52,27 +45,19 @@ namespace Berber.Data.Initializers // Proje adınız neyse ona göre düzeltin
 
                     if (!result.Succeeded)
                     {
-                        // Hata günlüğü (Aynı)
                         logger.LogError("HATA: Admin kullanıcısı oluşturulamadı.");
                         foreach (var error in result.Errors)
                         {
                             logger.LogError($" - {error.Description}");
                         }
-                        return; // Kullanıcı oluşmadıysa devam etme
+                        return; 
                     }
 
-                    // Kullanıcı başarıyla oluşturulduysa,
-                    // onu 'adminUser' değişkenine ata ki aşağıdaki kod çalışsın
                     adminUser = newAdminUser;
                 }
 
-                // BU BLOK ARTIK DIŞARIDA:
-                // Bu noktada 'adminUser' ya bulundu ya da az önce oluşturuldu.
-                // Şimdi rolde olup olmadığını kontrol et.
-
                 if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
                 {
-                    // Kullanıcı 'Admin' rolünde değilse, şimdi ekle
                     logger.LogInformation("Admin kullanıcısı 'Admin' rolüne atanıyor...");
                     var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
 
@@ -87,7 +72,6 @@ namespace Berber.Data.Initializers // Proje adınız neyse ona göre düzeltin
                 }
                 else
                 {
-                    // Bu logu görüyorsanız, veritabanını temizlememişsiniz demektir
                     logger.LogInformation("Admin kullanıcısı zaten 'Admin' rolünde.");
                 }
 
