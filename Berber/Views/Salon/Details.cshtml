@@ -1,13 +1,12 @@
 ﻿@model Berber.Models.Salon
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Salon Detayları";
 }
 
-<h1>Details</h1>
 
 <div>
-    <h4>Salon</h4>
+    <h4>@Model.Ad</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -30,7 +29,8 @@
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="form-group mt-4">
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Düzenle</a>
+    <a asp-action="Index" class="btn btn-outline-secondary">Listeye Geri Dön</a>
 </div>

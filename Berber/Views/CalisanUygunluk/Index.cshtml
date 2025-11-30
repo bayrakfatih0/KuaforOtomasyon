@@ -9,13 +9,6 @@
 
 <h1>@calisanAd - Çalışma Saatleri</h1>
 
-<p>
-    @* "Yeni Ekle" butonuna basınca hangi çalışana ekleyeceğimizi (calisanId) gönderiyoruz *@
-    <a asp-action="Create" asp-route-calisanId="@calisanId" class="btn btn-primary">Yeni Saat Ekle</a>
-
-    @* Çalışan listesine geri dönme butonu *@
-    <a asp-controller="Calisan" asp-action="Index" class="btn btn-outline-secondary">Çalışan Listesine Dön</a>
-</p>
 
 <table class="table table-bordered">
     <thead>
@@ -42,5 +35,10 @@
                 </td>
             </tr>
         }
+
     </tbody>
 </table>
+<p>
+    <a asp-action="Create" asp-route-calisanId="@calisanId" class="btn btn-primary">Yeni Saat Ekle</a>
+    <a asp-controller="Calisan" asp-action="Index" class="btn btn-outline-secondary">Çalışan Listesine Dön</a>
+</p>
