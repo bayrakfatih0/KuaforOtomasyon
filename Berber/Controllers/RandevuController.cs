@@ -120,7 +120,7 @@ namespace Berber.Controllers
 
             return RedirectToAction(nameof(RandevuOnaylandi), new { randevuId = yeniRandevu.Id });
         }
-.
+
 
         public IActionResult RandevuOnaylandi(int randevuId)
         {

@@ -38,6 +38,9 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddRazorPages();
 
+builder.Services.AddScoped<GeminiSchedulingService>();
+
+builder.Services.AddScoped<AppointmentAutomationService>();
 
 var app = builder.Build();
 

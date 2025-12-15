@@ -114,5 +114,57 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <button class="btn btn-primary btn-lg rounded-circle shadow-lg"
+            data-bs-toggle="modal" data-bs-target="#aiChatModal"
+            style="position: fixed; bottom: 20px; right: 20px; z-index: 1050; width: 60px; height: 60px;">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <div class="modal fade" id="aiChatModal" tabindex="-1" aria-labelledby="aiChatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="aiChatModalLabel"><i class="fas fa-brain"></i> AI Asistanı</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="ProcessRequest" asp-controller="AI" method="post">
+                    <div class="modal-body">
+                        <p class="text-muted small">İstediğiniz randevuyu doğal dilde yazın. Örneğin: "Yarın 14:00'te saç kesimi."</p>
+
+                        @* Eğer TempData'da hata varsa, burada gösterilir. *@
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                        }
+
+                        <div class="form-group mb-3">
+                            <textarea name="requestText" class="form-control" rows="3"
+                                      placeholder="Randevu isteğinizi buraya yazın..." required></textarea>
+                        </div>
+
+                        @* Eğer yönlendirme sonrası hata mesajı gösterilecekse, modalın otomatik açılması için JavaScript ekleyeceğiz. *@
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-magic"></i> Randevu Ara</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Eğer Controller'dan bir hata mesajı TempData ile geldiyse, modalı otomatik aç.
+        // Bu, kullanıcı yönlendirildikten sonra hatasını görebilmesi için kritiktir.
+        $(document).ready(function () {
+            if ('@TempData["ErrorMessage"]' !== '') {
+                var modal = new bootstrap.Modal(document.getElementById('aiChatModal'));
+                modal.show();
+            }
+        });
+    </script>
+
 </body>
 </html>

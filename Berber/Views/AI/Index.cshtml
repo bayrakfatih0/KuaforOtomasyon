@@ -1,0 +1,38 @@
+﻿@* Views/AI/Index.cshtml *@
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@{
+    ViewData["Title"] = "Yapay Zeka ile Randevu";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-robot"></i> Yapay Zeka Randevu Asistanı</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-muted">İstediğiniz randevuyu doğal dilde yazın. Örnek: **"Yarın öğleden sonra saç kesimi için Ahmet Usta'dan randevu istiyorum."**</p>
+
+                    @* Kontrollerde hata olduğunda gösterilecek alan *@
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+
+                    @* Form, metni alıp AIController'a POST edecektir. *@
+                    <form asp-action="ProcessRequest" asp-controller="AI" method="post">
+                        <div class="form-group mb-3">
+                            <textarea name="requestText" class="form-control" rows="4"
+                                      placeholder="Randevu isteğinizi buraya yazın..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-magic"></i> Randevu Ara
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
