@@ -54,6 +54,8 @@ namespace Berber.Services
 
             Calisan? selectedEmployee = null;
 
+
+
             // b. İstenen saatte Vardiya ve Randevu Çakışma Kontrolü
             foreach (var employee in suitableEmployees)
             {
