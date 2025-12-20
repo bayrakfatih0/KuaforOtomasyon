@@ -21,26 +21,27 @@
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Berber.styles.css" asp-append-version="true" />
+    <style>
+        #ai-chat-window {
+            transition: all 0.3s ease-in-out;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="d-flex" id="wrapper">
         <nav id="sidebar-wrapper" class="bg-primary text-white border-right d-flex flex-column">
-
             <div class="sidebar-heading">Berberim</div>
-
             <div class="list-group list-group-flush flex-grow-1">
-
                 <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action text-white">
                     <i class="fas fa-fw fa-tachometer-alt me-2"></i> Dashboard
                 </a>
-
                 @if (SignInManager.IsSignedIn(User) && !User.IsInRole("Admin"))
                 {
                     <a asp-controller="Randevu" asp-action="Randevularim" class="list-group-item list-group-item-action text-white">
                         <i class="fas fa-fw fa-calendar-alt me-2"></i> Randevularım
                     </a>
                 }
-
                 @if (User.IsInRole("Admin"))
                 {
                     <h6 class="sidebar-subtitle">YÖNETİM</h6>
@@ -50,14 +51,12 @@
                     <a asp-controller="RandevuYonetim" asp-action="Index" class="list-group-item list-group-item-action text-white">Randevu Onayları</a>
                 }
             </div>
-
             <div class="sidebar-footer-links">
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <a href="#" class="list-group-item list-group-item-action text-white">
                         <i class="fas fa-fw fa-cog me-2"></i> Ayarlar
                     </a>
-
                     <form id="logoutForm" class="form-inline m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/">
                         <button id="logout" type="submit" class="list-group-item list-group-item-action text-white border-0 w-100">
                             <i class="fas fa-fw fa-sign-out-alt me-2"></i> Çıkış
@@ -82,7 +81,6 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     }
-
                     @if (TempData["ErrorMessage"] != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -93,32 +91,21 @@
                 </div>
                 <div class="container-fluid">
                     <h5 class="mb-0">@ViewData["Title"]</h5>
-
-
                     <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center">
-
                         <li class="nav-item me-4">
-                            <a class="nav-link position-relative" href="#">
-                                <i class="fas fa-bell text-warning"></i>
-                            </a>
+                            <a class="nav-link position-relative" href="#"><i class="fas fa-bell text-warning"></i></a>
                         </li>
-
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                           
-                                @displayedUsername
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">@displayedUsername</a>
+                            <div class="dropdown-menu dropdown-menu-end">
                                 <a class="dropdown-item" href="#">Profilim</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#">Ayarlar</a>
                             </div>
                         </li>
                     </ul>
-
                 </div>
             </nav>
-
             <div class="container-fluid p-4">
                 @RenderBody()
             </div>
@@ -130,79 +117,115 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-@if (User.Identity.IsAuthenticated && User.IsInRole("Musteri") && !User.IsInRole("Admin"))
+
+
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Musteri") && !User.IsInRole("Admin"))
     {
-        <div id="ai-chat-bubble" onclick="toggleChat()" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #007bff; borderRadius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999;">
-    <i class="fas fa-robot" style="color: white; font-size: 24px;"></i>
-    </div>
-
-    <div id="ai-chat-window" style="position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; z-index: 9999; border: 1px solid #eee;">
-    <div style="background: #007bff; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between;">
-        <span><i class="fas fa-magic"></i> AI Randevu Asistanı</span>
-        <i class="fas fa-times" onclick="toggleChat()" style="cursor: pointer;"></i>
-    </div>
-    
-    <div id="chat-content" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px;">
-        <div style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">
-            Merhaba! Ben akıllı asistanınız. Size nasıl bir randevu ayarlayabilirim?
+        <div id="ai-chat-bubble" onclick="toggleChat()" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #007bff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999;">
+            <i class="fas fa-robot" style="color: white; font-size: 24px;"></i>
         </div>
-    </div>
 
-    <div style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px;">
-        <input type="text" id="user-msg" placeholder="Mesajınızı yazın..." style="flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 20px; outline: none;">
-        <button onclick="sendLiveMessage()" style="background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">
-            <i class="fas fa-paper-plane"></i>
-        </button>
-    </div>
-    </div>
+        <div id="ai-chat-window" style="position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; z-index: 9999; border: 1px solid #eee;">
+            <div style="background: #007bff; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fas fa-magic"></i> AI Randevu Asistanı</span>
+                <div>
+                    <i id="expand-icon" class="fas fa-expand-alt" onclick="toggleExpand()" style="cursor: pointer; margin-right: 15px;" title="Büyüt/Küçült"></i>
+                    <i class="fas fa-times" onclick="toggleChat()" style="cursor: pointer;"></i>
+                </div>
+            </div>
+            
+            <div id="chat-content" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px;">
+                <div style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">
+                    Merhaba! Ben akıllı asistanınız. Size nasıl bir randevu ayarlayabilirim?
+                </div>
+            </div>
 
-    <script>
-    function toggleChat() {
-        const window = document.getElementById('ai-chat-window');
-        window.style.display = window.style.display === 'none' ? 'flex' : 'none';
+            <div style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px;">
+                <input type="text" id="user-msg" onkeypress="if(event.key === 'Enter') sendLiveMessage()" placeholder="Mesajınızı yazın..." style="flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 20px; outline: none;">
+                <button onclick="sendLiveMessage()" style="background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <script>
+            let isExpanded = false;
+
+            // PENCEREYİ AÇ / KAPAT
+            function toggleChat() {
+                const chatWindow = document.getElementById('ai-chat-window');
+                if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+                    chatWindow.style.display = 'flex';
+                } else {
+                    chatWindow.style.display = 'none';
+                }
+            }
+
+            // PENCEREYİ BÜYÜT / KÜÇÜLT
+            function toggleExpand() {
+                const chatWindow = document.getElementById('ai-chat-window');
+                const icon = document.getElementById('expand-icon');
+
+                if (!isExpanded) {
+                    chatWindow.style.width = "600px";
+                    chatWindow.style.height = "80vh";
+                    chatWindow.style.bottom = "20px";
+                    icon.classList.replace('fa-expand-alt', 'fa-compress-alt');
+                } else {
+                    chatWindow.style.width = "350px";
+                    chatWindow.style.height = "500px";
+                    chatWindow.style.bottom = "100px";
+                    icon.classList.replace('fa-compress-alt', 'fa-expand-alt');
+                }
+                isExpanded = !isExpanded;
+            }
+
+            // MESAJ GÖNDER
+            async function sendLiveMessage() {
+                const input = document.getElementById('user-msg');
+                const chatContent = document.getElementById('chat-content');
+                const userPrompt = input.value.trim();
+                
+                if (!userPrompt) return;
+
+                // Kullanıcı mesajını ekrana yaz
+                chatContent.innerHTML += `<div style="align-self: flex-end; background: #007bff; color: white; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">${userPrompt}</div>`;
+                input.value = '';
+                chatContent.scrollTop = chatContent.scrollHeight;
+
+                // "Düşünüyor..." göstergesi ekle
+                const typingId = "typing-" + Date.now();
+                chatContent.innerHTML += `<div id="${typingId}" style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; font-size: 12px; font-style: italic;">Asistan düşünüyor...</div>`;
+                chatContent.scrollTop = chatContent.scrollHeight;
+
+                try {
+                    const response = await fetch('/AI/ProcessLiveRequest', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `requestText=${encodeURIComponent(userPrompt)}`
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Düşünüyor yazısını kaldır
+                    const typingElement = document.getElementById(typingId);
+                    if(typingElement) typingElement.remove();
+
+                    // AI yanıtını ekle
+                    chatContent.innerHTML += `<div style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">${data.message}</div>`;
+                    chatContent.scrollTop = chatContent.scrollHeight;
+
+                    // Eğer randevu başarılıysa sayfayı yenile
+                    if (data.success) {
+                        setTimeout(() => { window.location.reload(); }, 2500);
+                    }
+                } catch (e) {
+                    const typingElement = document.getElementById(typingId);
+                    if(typingElement) typingElement.innerText = "Bağlantı hatası oluştu.";
+                }
+            }
+        </script>
     }
 
-    async function sendLiveMessage() {
-        const input = document.getElementById('user-msg');
-        const chatContent = document.getElementById('chat-content');
-        if (!input.value.trim()) return;
-
-        // Kullanıcı mesajını ekle
-        chatContent.innerHTML += `<div style="align-self: flex-end; background: #007bff; color: white; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">${input.value}</div>`;
-    
-        const userPrompt = input.value;
-        input.value = '';
-        chatContent.scrollTop = chatContent.scrollHeight;
-
-        // AI "Düşünüyor..." göstergesi
-        const typingId = "typing-" + Date.now();
-        chatContent.innerHTML += `<div id="${typingId}" style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; font-size: 12px; font-style: italic;">Asistan düşünüyor...</div>`;
-
-        // API İsteği (Gerçek LLM Entegrasyonu için Controller'a gider)
-        try {
-            const response = await fetch('/AI/ProcessLiveRequest', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `requestText=${encodeURIComponent(userPrompt)}`
-            });
-            const data = await response.json();
-        
-            document.getElementById(typingId).remove();
-            chatContent.innerHTML += `<div style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">${data.message}</div>`;
-        } catch (e) {
-            document.getElementById(typingId).innerText = "Üzgünüm, bir hata oluştu.";
-        }
-        chatContent.scrollTop = chatContent.scrollHeight;
-        const data = await response.json();
-
-        if (data.success) {
-            // Randevu alındıysa 2 saniye sonra sayfayı yenileyelim ki randevularım kısmında görsün
-            setTimeout(() => {
-                window.location.reload();
-            }, 3000);
-        }
-    }
-    </script>    
-}
 </body>
 </html>

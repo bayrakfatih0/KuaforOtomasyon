@@ -7,15 +7,17 @@ namespace Berber.Services
 {
     public class GeminiSchedulingService
     {
-        // Google AI Studio'dan aldığınız API Key'i buraya yapıştırın
-        private readonly string _apiKey = "AIzaSyCP1vUfg9XbggtL_qILOBHWpfic5Vpss2k";
+        private readonly string _apiKey;
         private readonly string _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
+        public GeminiSchedulingService(Microsoft.Extensions.Configuration.IConfiguration configuration)
+        {
+            _apiKey = configuration["Gemini:ApiKey"];
+        }
         public async Task<GeminiAppointmentOutput> ParseRequestAsync(string userText)
         {
             using var client = new HttpClient();
 
-            // AI'ya verilen Sistem Talimatı (Prompt Engineering)
-            // Bu kısım AI'nın "canlı" ve "mantıklı" davranmasını sağlar.
             var prompt = $@"
             Sen bir kuaför salonunun akıllı asistanısın. Kullanıcının mesajı: '{userText}'
             Bugünün tarihi ve saati: {DateTime.Now:dd MMMM yyyy dddd, HH:mm}.
@@ -25,6 +27,7 @@ namespace Berber.Services
             2. Eğer kullanıcı randevu almak istiyorsa, mesajdan 'HizmetAdi', 'Tarih' ve 'Saat' bilgilerini ayıkla.
             3. Eksik bilgi varsa (örneğin sadece 'saç kesimi' dedi ama zaman belirtmedi), BasariliMi: false yap ve HataMesaji kısmına kullanıcıdan eksik bilgiyi istemek için bir soru yaz.
             4. Eğer tüm bilgiler (Hizmet, Tarih, Saat) netse, BasariliMi: true yap.
+            5. Eğer kullanıcı belirli bir çalışan ismi belirtiyorsa (örn: 'Ahmet', 'Mehmet Bey'), bu ismi 'CalisanAd' alanına yaz.
 
             ÖNEMLİ KURALLAR:
             - Tarihi her zaman YYYY-MM-DD formatında döndür.
@@ -32,11 +35,11 @@ namespace Berber.Services
             - Yanıtını SADECE aşağıdaki JSON formatında ver, başka açıklama ekleme.
 
             ÇIKTI FORMATI:
-            {{
-              ""BasariliMi"": false,
+            {{""BasariliMi"": false,
               ""HizmetAdi"": """",
               ""Tarih"": """",
               ""Saat"": """",
+              ""CalisanAd"": """", // Yeni eklenen alan
               ""HataMesaji"": """"
             }}";
 
@@ -57,7 +60,6 @@ namespace Berber.Services
                 var jsonRequest = JsonSerializer.Serialize(requestBody);
                 var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-                // API İsteği
                 var response = await client.PostAsync($"{_apiUrl}?key={_apiKey}", content);
                 var responseString = await response.Content.ReadAsStringAsync();
 
@@ -71,7 +73,6 @@ namespace Berber.Services
                     };
                 }
 
-                // Gemini'den gelen ham yanıtı işle
                 return ExtractJsonResponse(responseString);
             }
             catch (Exception ex)
@@ -85,14 +86,12 @@ namespace Berber.Services
             try
             {
                 using var doc = JsonDocument.Parse(responseString);
-                // Gemini API hiyerarşisinde metne ulaşma: candidates[0].content.parts[0].text
                 var rawText = doc.RootElement
                     .GetProperty("candidates")[0]
                     .GetProperty("content")
                     .GetProperty("parts")[0]
                     .GetProperty("text").GetString();
 
-                // AI bazen yanıtı ```json ... ``` blokları içine alabilir, onları temizliyoruz
                 var cleanJson = rawText.Replace("```json", "").Replace("```", "").Trim();
 
                 return JsonSerializer.Deserialize<GeminiAppointmentOutput>(cleanJson, new JsonSerializerOptions

@@ -1,5 +1,4 @@
-﻿@* Views/AI/Index.cshtml *@
-@using Microsoft.AspNetCore.Mvc.Localization
+﻿@using Microsoft.AspNetCore.Mvc.Localization
 
 @{
     ViewData["Title"] = "Yapay Zeka ile Randevu";
@@ -15,13 +14,11 @@
                 <div class="card-body">
                     <p class="lead text-muted">İstediğiniz randevuyu doğal dilde yazın. Örnek: **"Yarın öğleden sonra saç kesimi için Ahmet Usta'dan randevu istiyorum."**</p>
 
-                    @* Kontrollerde hata olduğunda gösterilecek alan *@
                     @if (TempData["ErrorMessage"] != null)
                     {
                         <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
                     }
 
-                    @* Form, metni alıp AIController'a POST edecektir. *@
                     <form asp-action="ProcessRequest" asp-controller="AI" method="post">
                         <div class="form-group mb-3">
                             <textarea name="requestText" class="form-control" rows="4"

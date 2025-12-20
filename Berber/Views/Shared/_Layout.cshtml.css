@@ -46,3 +46,7 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+#ai-chat-window {
+    /* ... mevcut stilleriniz ... */
+    transition: all 0.3s ease-in-out; /* Boyut değişimlerini canlandırır */
+}
