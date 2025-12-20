@@ -73,7 +73,6 @@
             </div>
         </nav>
         <div id="page-content-wrapper" class="flex-grow-1">
-
             <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
                 <div class="container mt-3">
                     @if (TempData["SuccessMessage"] != null)
@@ -131,57 +130,79 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+@if (User.Identity.IsAuthenticated && User.IsInRole("Musteri") && !User.IsInRole("Admin"))
+    {
+        <div id="ai-chat-bubble" onclick="toggleChat()" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #007bff; borderRadius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999;">
+    <i class="fas fa-robot" style="color: white; font-size: 24px;"></i>
+    </div>
 
-    <button class="btn btn-primary btn-lg rounded-circle shadow-lg"
-            data-bs-toggle="modal" data-bs-target="#aiChatModal"
-            style="position: fixed; bottom: 20px; right: 20px; z-index: 1050; width: 60px; height: 60px;">
-        <i class="fas fa-robot"></i>
-    </button>
-
-    <div class="modal fade" id="aiChatModal" tabindex="-1" aria-labelledby="aiChatModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="aiChatModalLabel"><i class="fas fa-brain"></i> AI Asistanı</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form asp-action="ProcessRequest" asp-controller="AI" method="post">
-                    <div class="modal-body">
-                        <p class="text-muted small">İstediğiniz randevuyu doğal dilde yazın. Örneğin: "Yarın 14:00'te saç kesimi."</p>
-
-                        @* Eğer TempData'da hata varsa, burada gösterilir. *@
-                        @if (TempData["ErrorMessage"] != null)
-                        {
-                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-                        }
-
-                        <div class="form-group mb-3">
-                            <textarea name="requestText" class="form-control" rows="3"
-                                      placeholder="Randevu isteğinizi buraya yazın..." required></textarea>
-                        </div>
-
-                        @* Eğer yönlendirme sonrası hata mesajı gösterilecekse, modalın otomatik açılması için JavaScript ekleyeceğiz. *@
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
-                        <button type="submit" class="btn btn-success"><i class="fas fa-magic"></i> Randevu Ara</button>
-                    </div>
-                </form>
-            </div>
+    <div id="ai-chat-window" style="position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; z-index: 9999; border: 1px solid #eee;">
+    <div style="background: #007bff; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between;">
+        <span><i class="fas fa-magic"></i> AI Randevu Asistanı</span>
+        <i class="fas fa-times" onclick="toggleChat()" style="cursor: pointer;"></i>
+    </div>
+    
+    <div id="chat-content" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px;">
+        <div style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">
+            Merhaba! Ben akıllı asistanınız. Size nasıl bir randevu ayarlayabilirim?
         </div>
     </div>
 
-    <script>
-        // Eğer Controller'dan bir hata mesajı TempData ile geldiyse, modalı otomatik aç.
-        // Bu, kullanıcı yönlendirildikten sonra hatasını görebilmesi için kritiktir.
-        $(document).ready(function () {
-            if ('@TempData["ErrorMessage"]' !== '') {
-                var modal = new bootstrap.Modal(document.getElementById('aiChatModal'));
-                modal.show();
-            }
-        });
-    </script>
+    <div style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px;">
+        <input type="text" id="user-msg" placeholder="Mesajınızı yazın..." style="flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 20px; outline: none;">
+        <button onclick="sendLiveMessage()" style="background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+    </div>
 
+    <script>
+    function toggleChat() {
+        const window = document.getElementById('ai-chat-window');
+        window.style.display = window.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    async function sendLiveMessage() {
+        const input = document.getElementById('user-msg');
+        const chatContent = document.getElementById('chat-content');
+        if (!input.value.trim()) return;
+
+        // Kullanıcı mesajını ekle
+        chatContent.innerHTML += `<div style="align-self: flex-end; background: #007bff; color: white; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">${input.value}</div>`;
+    
+        const userPrompt = input.value;
+        input.value = '';
+        chatContent.scrollTop = chatContent.scrollHeight;
+
+        // AI "Düşünüyor..." göstergesi
+        const typingId = "typing-" + Date.now();
+        chatContent.innerHTML += `<div id="${typingId}" style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; font-size: 12px; font-style: italic;">Asistan düşünüyor...</div>`;
+
+        // API İsteği (Gerçek LLM Entegrasyonu için Controller'a gider)
+        try {
+            const response = await fetch('/AI/ProcessLiveRequest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `requestText=${encodeURIComponent(userPrompt)}`
+            });
+            const data = await response.json();
+        
+            document.getElementById(typingId).remove();
+            chatContent.innerHTML += `<div style="align-self: flex-start; background: #e9ecef; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px;">${data.message}</div>`;
+        } catch (e) {
+            document.getElementById(typingId).innerText = "Üzgünüm, bir hata oluştu.";
+        }
+        chatContent.scrollTop = chatContent.scrollHeight;
+        const data = await response.json();
+
+        if (data.success) {
+            // Randevu alındıysa 2 saniye sonra sayfayı yenileyelim ki randevularım kısmında görsün
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
+    }
+    </script>    
+}
 </body>
 </html>

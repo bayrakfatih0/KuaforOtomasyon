@@ -1,74 +1,108 @@
-﻿using Berber.Models;
-using Microsoft.Extensions.Configuration; // IConfiguration için
+﻿using System.Text;
 using System.Text.Json;
-using System.Linq;
-using System.Collections.Generic;
-using System;
-
-// Hata veren using'leri kaldırdık: using Google.AI.GenerativeAI;
-// Hata veren using'leri kaldırdık: using Google.AI.GenerativeAI.Types; 
+using Berber.Models;
+using System.Net.Http;
 
 namespace Berber.Services
 {
-    // Artık GenerativeModel yerine sadece temel servisimizi tutuyoruz.
     public class GeminiSchedulingService
     {
-        private readonly IConfiguration _configuration;
-
-        public GeminiSchedulingService(IConfiguration configuration)
+        // Google AI Studio'dan aldığınız API Key'i buraya yapıştırın
+        private readonly string _apiKey = "AIzaSyCP1vUfg9XbggtL_qILOBHWpfic5Vpss2k";
+        private readonly string _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+        public async Task<GeminiAppointmentOutput> ParseRequestAsync(string userText)
         {
-            _configuration = configuration;
-            // Gerçek API anahtarı kontrolü burada yapılabilir.
-            var apiKey = configuration["Gemini:ApiKey"];
-            if (string.IsNullOrEmpty(apiKey))
+            using var client = new HttpClient();
+
+            // AI'ya verilen Sistem Talimatı (Prompt Engineering)
+            // Bu kısım AI'nın "canlı" ve "mantıklı" davranmasını sağlar.
+            var prompt = $@"
+            Sen bir kuaför salonunun akıllı asistanısın. Kullanıcının mesajı: '{userText}'
+            Bugünün tarihi ve saati: {DateTime.Now:dd MMMM yyyy dddd, HH:mm}.
+
+            GÖREVİN:
+            1. Eğer kullanıcı sadece selam veriyorsa (merhaba, nasılsın vb.), BasariliMi: false yap ve HataMesaji kısmına nazik bir karşılama yaz.
+            2. Eğer kullanıcı randevu almak istiyorsa, mesajdan 'HizmetAdi', 'Tarih' ve 'Saat' bilgilerini ayıkla.
+            3. Eksik bilgi varsa (örneğin sadece 'saç kesimi' dedi ama zaman belirtmedi), BasariliMi: false yap ve HataMesaji kısmına kullanıcıdan eksik bilgiyi istemek için bir soru yaz.
+            4. Eğer tüm bilgiler (Hizmet, Tarih, Saat) netse, BasariliMi: true yap.
+
+            ÖNEMLİ KURALLAR:
+            - Tarihi her zaman YYYY-MM-DD formatında döndür.
+            - Saati her zaman HH:MM formatında döndür.
+            - Yanıtını SADECE aşağıdaki JSON formatında ver, başka açıklama ekleme.
+
+            ÇIKTI FORMATI:
+            {{
+              ""BasariliMi"": false,
+              ""HizmetAdi"": """",
+              ""Tarih"": """",
+              ""Saat"": """",
+              ""HataMesaji"": """"
+            }}";
+
+            var requestBody = new
             {
-                //throw new InvalidOperationException("Gemini API Key 'appsettings.json' dosyasında bulunamadı.");
-                // Şimdilik sadece uyarı verelim ve simülasyona devam edelim.
+                contents = new[]
+                {
+                    new {
+                        parts = new[] {
+                            new { text = prompt }
+                        }
+                    }
+                }
+            };
+
+            try
+            {
+                var jsonRequest = JsonSerializer.Serialize(requestBody);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                // API İsteği
+                var response = await client.PostAsync($"{_apiUrl}?key={_apiKey}", content);
+                var responseString = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorDetail = await response.Content.ReadAsStringAsync();
+                    return new GeminiAppointmentOutput
+                    {
+                        BasariliMi = false,
+                        HataMesaji = $"API Hatası ({response.StatusCode}): {errorDetail}"
+                    };
+                }
+
+                // Gemini'den gelen ham yanıtı işle
+                return ExtractJsonResponse(responseString);
+            }
+            catch (Exception ex)
+            {
+                return new GeminiAppointmentOutput { BasariliMi = false, HataMesaji = "Bir hata oluştu: " + ex.Message };
             }
         }
 
-        // Simülasyon: Metin çözümleme mantığı
-        public async Task<GeminiAppointmentOutput> ParseRequestAsync(string naturalLanguageText)
+        private GeminiAppointmentOutput ExtractJsonResponse(string responseString)
         {
-            // Bu kısım, gerçek bir LLM API çağrısının yerine geçer.
-            // Amaç: Projenin Controller'ının beklendiği gibi çalışmasını sağlamak.
-
-            await Task.Delay(100); // Asenkron çalışmayı taklit et
-
-            var textLower = naturalLanguageText.ToLowerInvariant();
-
-            // Örnek Simülasyon Senaryoları:
-            if (textLower.Contains("saç kesimi") && (textLower.Contains("yarın") || textLower.Contains("yarın")))
+            try
             {
-                // Başarılı senaryo: Saç Kesimi ve Yarın bulundu.
-                return new GeminiAppointmentOutput
+                using var doc = JsonDocument.Parse(responseString);
+                // Gemini API hiyerarşisinde metne ulaşma: candidates[0].content.parts[0].text
+                var rawText = doc.RootElement
+                    .GetProperty("candidates")[0]
+                    .GetProperty("content")
+                    .GetProperty("parts")[0]
+                    .GetProperty("text").GetString();
+
+                // AI bazen yanıtı ```json ... ``` blokları içine alabilir, onları temizliyoruz
+                var cleanJson = rawText.Replace("```json", "").Replace("```", "").Trim();
+
+                return JsonSerializer.Deserialize<GeminiAppointmentOutput>(cleanJson, new JsonSerializerOptions
                 {
-                    BasariliMi = true,
-                    HizmetAdi = "Saç Kesimi", // Veritabanındaki Hizmet Adı ile eşleşmeli
-                    Tarih = DateTime.Today.AddDays(1).ToString("yyyy-MM-dd"),
-                    Saat = "15:00",
-                    CalisanAdi = textLower.Contains("ali") ? "Ali Usta" : ""
-                };
+                    PropertyNameCaseInsensitive = true
+                });
             }
-            else if (textLower.Contains("boya") && textLower.Contains("pazartesi"))
+            catch
             {
-                // Başarılı senaryo 2
-                return new GeminiAppointmentOutput
-                {
-                    BasariliMi = true,
-                    HizmetAdi = "Boya",
-                    Tarih = DateTime.Today.AddDays(7).ToString("yyyy-MM-dd"),
-                    Saat = "10:30"
-                };
-            }
-            else
-            {
-                // Başarısız senaryo: Gerekli veriler eksik.
-                return new GeminiAppointmentOutput
-                {
-                    BasariliMi = false,
-                    HataMesaji = "İstediğiniz Hizmet, Tarih veya Saat bilgisini net çıkaramadım. Lütfen isteğinizi detaylandırın."
-                };
+                return new GeminiAppointmentOutput { BasariliMi = false, HataMesaji = "Üzgünüm, isteğinizi tam anlayamadım." };
             }
         }
     }
